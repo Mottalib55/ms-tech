@@ -1,26 +1,148 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: #0a0a0b;
+  --color-foreground: #f5f5f5;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Root variables ── */
+:root {
+  --gold: #f4be7e;
+  --gold-light: #f9d09f;
+  --gold-dark: #d4a06a;
+  --blue: #5682f2;
+  --blue-light: #7ea0f8;
+  --bg: #0a0a0b;
+  --surface: rgba(255,255,255,0.03);
+  --surface-border: rgba(255,255,255,0.06);
+  --surface-hover: rgba(255,255,255,0.05);
+  --text-primary: #f5f5f5;
+  --text-secondary: #a0a0a6;
+  --text-tertiary: #6b6b73;
+  --positive: #34d399;
+  --negative: #f87171;
+  --brand-red: #DC2626;
+  --radius-card: 16px;
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ── Mesh gradient background ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(86,130,242,0.08), transparent),
+    radial-gradient(ellipse 60% 50% at 80% 50%, rgba(244,190,126,0.04), transparent),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(86,130,242,0.03), transparent);
+  pointer-events: none;
+}
+
+/* ── Keyframes ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(244,190,126,0.3); }
+  50%      { box-shadow: 0 0 20px rgba(244,190,126,0.6); }
+}
+
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes backdropFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.04; }
+  50%      { opacity: 0.08; }
+}
+
+@keyframes slideIndicator {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+/* ── Animate-in utility ── */
+.animate-in {
+  animation: fadeInUp 0.5s var(--ease-premium) both;
+}
+.animate-in-1 { animation-delay: 0.05s; }
+.animate-in-2 { animation-delay: 0.1s; }
+.animate-in-3 { animation-delay: 0.15s; }
+.animate-in-4 { animation-delay: 0.2s; }
+.animate-in-5 { animation-delay: 0.25s; }
+.animate-in-6 { animation-delay: 0.3s; }
+.animate-in-7 { animation-delay: 0.35s; }
+.animate-in-8 { animation-delay: 0.4s; }
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.14);
+}
+
+/* ── Recharts tooltip override ── */
+.recharts-default-tooltip {
+  background-color: rgba(20,20,22,0.92) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+}
+
+/* ── Glass card base ── */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(12px);
+}
+
+/* ── Gold text gradient ── */
+.text-gold-gradient {
+  background: linear-gradient(116deg, #5682f2, #f9d09f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Selection color ── */
+::selection {
+  background: rgba(244,190,126,0.25);
+  color: #f5f5f5;
 }
