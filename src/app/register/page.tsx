@@ -2,8 +2,8 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 
@@ -13,7 +13,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { register } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -25,9 +24,27 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const success = await register(name, email, password);
-      if (success) {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Erreur lors de l'inscription.");
+        return;
+      }
+      // Auto sign-in after registration
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+      if (result?.error) {
+        setError("Compte créé mais erreur de connexion. Essayez de vous connecter.");
+      } else {
         router.push('/dashboard');
+        router.refresh();
       }
     } catch {
       setError("Erreur lors de l'inscription. Veuillez réessayer.");

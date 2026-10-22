@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── NextAuth Models ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  currency      String    @default("EUR")
+  language      String    @default("fr")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  authAccounts       AuthAccount[]
+  sessions           Session[]
+  providerConnections ProviderConnection[]
+  cryptoApiKeys      CryptoApiKey[]
+  financialAccounts  FinancialAccount[]
+  monthlyBudgets     MonthlyBudget[]
+  performancePoints  PerformancePoint[]
+}
+
+model AuthAccount {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@map("auth_accounts")
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ─── Provider Connections ────────────────────────────────────────
+
+model ProviderConnection {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String
+  status            String   @default("pending")
+  externalId        String?
+  accessTokenEnc    String?
+  refreshTokenEnc   String?
+  tokenExpiresAt    DateTime?
+  lastSyncAt        DateTime?
+  lastSyncStatus    String?
+  lastSyncError     String?
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  financialAccounts FinancialAccount[]
+  syncLogs          SyncLog[]
+
+  @@unique([userId, provider, externalId])
+}
+
+model CryptoApiKey {
+  id            String   @id @default(cuid())
+  userId        String
+  provider      String
+  apiKeyEnc     String
+  apiSecretEnc  String
+  label         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}
+
+// ─── Financial Data ──────────────────────────────────────────────
+
+model FinancialAccount {
+  id              String   @id @default(cuid())
+  userId          String
+  connectionId    String?
+  externalId      String?
+  name            String
+  institution     String
+  type            String
+  balance         Float    @default(0)
+  currency        String   @default("EUR")
+  lastSync        DateTime?
+  status          String   @default("connected")
+  color           String   @default("#f4be7e")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  connection ProviderConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  holdings   Holding[]
+  fees       Fee[]
+  transactions Transaction[]
+
+  @@index([userId])
+}
+
+model Holding {
+  id           String   @id @default(cuid())
+  accountId    String
+  externalId   String?
+  symbol       String
+  name         String
+  quantity     Float
+  avgPrice     Float
+  currentPrice Float
+  currency     String   @default("EUR")
+  assetClass   String
+  sector       String   @default("Other")
+  region       String   @default("Global")
+  dailyChange  Float    @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  account   FinancialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  dividends Dividend[]
+
+  @@index([accountId])
+}
+
+model Fee {
+  id             String   @id @default(cuid())
+  accountId      String
+  accountName    String
+  type           String
+  label          String
+  amount         Float
+  percentage     Float
+  frequency      String
+  suggestion     String?
+  alternativeFee Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  account FinancialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model Dividend {
+  id        String   @id @default(cuid())
+  holdingId String
+  symbol    String
+  name      String
+  amount    Float
+  currency  String   @default("EUR")
+  exDate    String
+  payDate   String
+  status    String
+  frequency String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  holding Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+
+  @@index([holdingId])
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  accountId   String
+  externalId  String?
+  type        String
+  symbol      String?
+  name        String?
+  quantity    Float?
+  price       Float?
+  amount      Float
+  currency    String   @default("EUR")
+  date        DateTime
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  account FinancialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([date])
+}
+
+// ─── Budget ──────────────────────────────────────────────────────
+
+model MonthlyBudget {
+  id         String   @id @default(cuid())
+  userId     String
+  month      String
+  income     Float
+  expenses   Float
+  savings    Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories BudgetCategory[]
+
+  @@unique([userId, month])
+}
+
+model BudgetCategory {
+  id        String @id @default(cuid())
+  budgetId  String
+  name      String
+  icon      String
+  color     String
+  budgeted  Float
+  spent     Float
+
+  budget MonthlyBudget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+}
+
+// ─── Performance ─────────────────────────────────────────────────
+
+model PerformancePoint {
+  id     String @id @default(cuid())
+  userId String
+  date   String
+  value  Float
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+// ─── Sync Logs ───────────────────────────────────────────────────
+
+model SyncLog {
+  id           String   @id @default(cuid())
+  connectionId String
+  status       String
+  durationMs   Int?
+  recordCount  Int?
+  error        String?
+  createdAt    DateTime @default(now())
+
+  connection ProviderConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId])
+}

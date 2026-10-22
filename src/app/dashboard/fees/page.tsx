@@ -7,7 +7,7 @@ import {
 import Card, { CardHeader, CardTitle } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import AnimatedNumber from '@/components/ui/AnimatedNumber';
-import { mockFees } from '@/data/mock';
+import { useFees } from '@/hooks/useFees';
 import { formatCurrency, formatCurrencyDetailed } from '@/lib/utils';
 
 const feeTypeLabels: Record<string, string> = {
@@ -24,15 +24,15 @@ const tooltipStyle = {
   borderRadius: '12px',
 };
 
-function generateImpactData() {
-  const totalAnnualFees = mockFees.reduce((s, f) => s + f.amount, 0);
+function generateImpactData(fees: { amount: number; percentage: number; alternativeFee?: number }[]) {
+  const totalAnnualFees = fees.reduce((s, f) => s + f.amount, 0);
   const capital = 396271;
   const rate = 0.07;
   const data = [];
   let withFees = capital;
   let withoutFees = capital;
   let optimized = capital;
-  const optimizedFees = mockFees.reduce((s, f) => s + (f.alternativeFee !== undefined ? (f.amount * (f.alternativeFee / f.percentage)) : f.amount), 0);
+  const optimizedFees = fees.reduce((s, f) => s + (f.alternativeFee !== undefined ? (f.amount * (f.alternativeFee / f.percentage)) : f.amount), 0);
 
   for (let year = 0; year <= 30; year++) {
     data.push({
@@ -48,13 +48,16 @@ function generateImpactData() {
   return data;
 }
 
-const impactData = generateImpactData();
-const totalAnnualFees = mockFees.reduce((s, f) => s + f.amount, 0);
-const potentialSavings = mockFees
-  .filter((f) => f.alternativeFee !== undefined)
-  .reduce((s, f) => s + (f.amount - (f.amount * (f.alternativeFee! / f.percentage))), 0);
-
 export default function FeesPage() {
+  const { data: fees } = useFees();
+  const feesList = fees ?? [];
+
+  const impactData = generateImpactData(feesList);
+  const totalAnnualFees = feesList.reduce((s, f) => s + f.amount, 0);
+  const potentialSavings = feesList
+    .filter((f) => f.alternativeFee !== undefined)
+    .reduce((s, f) => s + (f.amount - (f.amount * (f.alternativeFee! / f.percentage))), 0);
+
   return (
     <div className="space-y-6">
       <div className="animate-in">
@@ -97,7 +100,7 @@ export default function FeesPage() {
             <div>
               <p className="text-sm text-[#a0a0a6]">Impact sur 20 ans</p>
               <p className="text-xl font-bold text-[#f87171]">
-                -{formatCurrency(impactData[20]['Sans frais'] - impactData[20]['Avec frais actuels'])}
+                -{formatCurrency(impactData[20] ? impactData[20]['Sans frais'] - impactData[20]['Avec frais actuels'] : 0)}
               </p>
             </div>
           </div>
@@ -129,7 +132,7 @@ export default function FeesPage() {
           <CardTitle>Détail des frais</CardTitle>
         </CardHeader>
         <div className="space-y-4">
-          {mockFees.map((fee) => (
+          {feesList.map((fee) => (
             <div key={fee.id} className="p-4 bg-[rgba(255,255,255,0.03)] rounded-[12px] border border-[rgba(255,255,255,0.04)]">
               <div className="flex items-start justify-between mb-2">
                 <div>

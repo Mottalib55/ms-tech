@@ -1,14 +1,15 @@
 'use client';
 
 import { Menu, Bell, Search } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSession } from 'next-auth/react';
 
 interface TopbarProps {
   onMenuClick: () => void;
 }
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   return (
     <header className="sticky top-2 z-30 mx-3 lg:mx-4 mt-2 mb-2">

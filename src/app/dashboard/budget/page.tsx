@@ -7,7 +7,8 @@ import {
 } from 'recharts';
 import Card, { CardHeader, CardTitle } from '@/components/ui/Card';
 import AnimatedNumber from '@/components/ui/AnimatedNumber';
-import { mockBudgetData, mockExpenseHistory } from '@/data/mock';
+import { useBudget } from '@/hooks/useBudget';
+import { mockExpenseHistory } from '@/data/mock';
 import { formatCurrency } from '@/lib/utils';
 
 const periods = ['Mensuel', 'Trimestriel', 'Annuel'] as const;
@@ -20,8 +21,9 @@ const tooltipStyle = {
 
 export default function BudgetPage() {
   const [periodIndex, setPeriodIndex] = useState(0);
-  const currentBudget = mockBudgetData[0];
-  const savingsRate = ((currentBudget.savings / currentBudget.income) * 100).toFixed(1);
+  const { data: budgetData } = useBudget();
+  const currentBudget = budgetData?.[0];
+  const savingsRate = currentBudget ? ((currentBudget.savings / currentBudget.income) * 100).toFixed(1) : '0';
 
   return (
     <div className="space-y-6">
@@ -54,7 +56,7 @@ export default function BudgetPage() {
             <div>
               <p className="text-sm text-[#a0a0a6]">Revenus</p>
               <p className="text-xl font-bold text-[#f5f5f5]">
-                <AnimatedNumber value={currentBudget.income} format={(n) => formatCurrency(n)} />
+                <AnimatedNumber value={currentBudget?.income ?? 0} format={(n) => formatCurrency(n)} />
               </p>
             </div>
           </div>
@@ -67,7 +69,7 @@ export default function BudgetPage() {
             <div>
               <p className="text-sm text-[#a0a0a6]">Dépenses</p>
               <p className="text-xl font-bold text-[#f5f5f5]">
-                <AnimatedNumber value={currentBudget.expenses} format={(n) => formatCurrency(n)} delay={100} />
+                <AnimatedNumber value={currentBudget?.expenses ?? 0} format={(n) => formatCurrency(n)} delay={100} />
               </p>
             </div>
           </div>
@@ -110,7 +112,7 @@ export default function BudgetPage() {
             <CardTitle>Budget par catégorie</CardTitle>
           </CardHeader>
           <div className="space-y-4">
-            {currentBudget.categories.map((cat) => {
+            {(currentBudget?.categories ?? []).map((cat) => {
               const pct = (cat.spent / cat.budgeted) * 100;
               const overBudget = cat.spent > cat.budgeted;
               return (
@@ -153,7 +155,7 @@ export default function BudgetPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[rgba(255,255,255,0.04)]">
-              {mockBudgetData.map((m) => (
+              {(budgetData ?? []).map((m) => (
                 <tr key={m.month} className="text-[#a0a0a6] hover:bg-[rgba(255,255,255,0.02)] transition-colors">
                   <td className="py-3 font-medium text-[#f5f5f5]">{m.month}</td>
                   <td className="py-3 text-right">{formatCurrency(m.income)}</td>

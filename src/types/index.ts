@@ -124,3 +124,39 @@ export interface LoanResult {
   totalInterest: number;
   amortization: { month: number; principal: number; interest: number; remaining: number }[];
 }
+
+export interface Transaction {
+  id: string;
+  accountId: string;
+  externalId?: string;
+  type: 'buy' | 'sell' | 'deposit' | 'withdrawal' | 'dividend' | 'fee' | 'transfer';
+  symbol?: string;
+  name?: string;
+  quantity?: number;
+  price?: number;
+  amount: number;
+  currency: string;
+  date: string;
+  description?: string;
+}
+
+export interface ProviderConnectionInfo {
+  id: string;
+  provider: string;
+  status: 'pending' | 'active' | 'error' | 'disconnected';
+  externalId?: string;
+  lastSyncAt?: string;
+  lastSyncStatus?: string;
+  lastSyncError?: string;
+  createdAt: string;
+}
+
+export interface SyncLogEntry {
+  id: string;
+  connectionId: string;
+  status: 'started' | 'success' | 'error';
+  durationMs?: number;
+  recordCount?: number;
+  error?: string;
+  createdAt: string;
+}

@@ -9,22 +9,15 @@ import Card, { CardHeader, CardTitle } from '@/components/ui/Card';
 import AnimatedNumber from '@/components/ui/AnimatedNumber';
 import ProgressRing from '@/components/ui/ProgressRing';
 import Sparkline from '@/components/ui/Sparkline';
-import {
-  mockPerformanceData,
-  mockAllocation,
-  mockHoldings,
-  mockAccounts,
-  totalPatrimoine,
-} from '@/data/mock';
+import { useAccounts } from '@/hooks/useAccounts';
+import { useHoldings } from '@/hooks/useHoldings';
+import { usePerformance } from '@/hooks/usePerformance';
+import { useAllocation } from '@/hooks/useAllocation';
+import { usePortfolioSummary } from '@/hooks/usePortfolioSummary';
 import { formatCurrency, formatPercent } from '@/lib/utils';
 
 const patrimonyChange = 8.45;
 const passiveIncome = 4850;
-
-const topHoldings = [...mockHoldings]
-  .sort((a, b) => b.quantity * b.currentPrice - a.quantity * a.currentPrice)
-  .slice(0, 5);
-
 const diversificationScore = 72;
 
 const tooltipStyle = {
@@ -33,9 +26,19 @@ const tooltipStyle = {
   borderRadius: '12px',
 };
 
-const sparkData = mockPerformanceData.slice(-12).map((p) => p.value);
-
 export default function DashboardPage() {
+  const { data: accounts } = useAccounts();
+  const { data: holdings } = useHoldings();
+  const { data: performanceData } = usePerformance();
+  const { data: allocation } = useAllocation();
+  const { totalPatrimoine, accountCount } = usePortfolioSummary();
+
+  const sparkData = (performanceData ?? []).slice(-12).map((p) => p.value);
+
+  const topHoldings = [...(holdings ?? [])]
+    .sort((a, b) => b.quantity * b.currentPrice - a.quantity * a.currentPrice)
+    .slice(0, 5);
+
   return (
     <div className="space-y-6">
       <div className="animate-in">
@@ -68,7 +71,7 @@ export default function DashboardPage() {
             <span className="text-sm text-[#a0a0a6]">Comptes connectés</span>
             <BarChart3 size={18} className="text-[#5682f2]" />
           </div>
-          <div className="text-2xl font-bold text-[#f5f5f5]">{mockAccounts.length}</div>
+          <div className="text-2xl font-bold text-[#f5f5f5]">{accountCount}</div>
           <div className="text-sm text-[#6b6b73] mt-1">Tous synchronisés</div>
         </Card>
 
@@ -124,7 +127,7 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={mockPerformanceData}>
+            <LineChart data={performanceData ?? []}>
               <XAxis
                 dataKey="date"
                 tick={{ fill: '#6b6b73', fontSize: 11 }}
@@ -164,7 +167,7 @@ export default function DashboardPage() {
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
-                data={mockAllocation}
+                data={allocation ?? []}
                 cx="50%"
                 cy="50%"
                 innerRadius={55}
@@ -172,7 +175,7 @@ export default function DashboardPage() {
                 paddingAngle={3}
                 dataKey="value"
               >
-                {mockAllocation.map((entry) => (
+                {(allocation ?? []).map((entry) => (
                   <Cell key={entry.name} fill={entry.color} />
                 ))}
               </Pie>
@@ -183,7 +186,7 @@ export default function DashboardPage() {
             </PieChart>
           </ResponsiveContainer>
           <div className="space-y-2 mt-2">
-            {mockAllocation.map((item) => (
+            {(allocation ?? []).map((item) => (
               <div key={item.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />

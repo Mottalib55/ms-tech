@@ -2,8 +2,8 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 
@@ -12,7 +12,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('demo1234');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -20,9 +19,16 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const success = await login(email, password);
-      if (success) {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+      if (result?.error) {
+        setError('Identifiants incorrects. Veuillez réessayer.');
+      } else {
         router.push('/dashboard');
+        router.refresh();
       }
     } catch {
       setError('Erreur de connexion. Veuillez réessayer.');

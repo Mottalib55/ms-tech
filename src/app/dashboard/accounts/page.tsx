@@ -18,7 +18,7 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
 import AnimatedNumber from '@/components/ui/AnimatedNumber';
-import { mockAccounts } from '@/data/mock';
+import { useAccounts } from '@/hooks/useAccounts';
 import { formatCurrency, formatRelativeTime } from '@/lib/utils';
 
 const accountIcons: Record<string, typeof Building2> = {
@@ -37,14 +37,15 @@ const statusConfig = {
 
 export default function AccountsPage() {
   const [showModal, setShowModal] = useState(false);
-  const totalBalance = mockAccounts.reduce((sum, a) => sum + a.balance, 0);
+  const { data: accounts } = useAccounts();
+  const totalBalance = (accounts ?? []).reduce((sum, a) => sum + a.balance, 0);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between animate-in">
         <div>
           <h1 className="text-2xl font-bold text-[#f5f5f5]">Comptes connectés</h1>
-          <p className="text-[#a0a0a6] text-sm mt-1">{mockAccounts.length} comptes &middot; {formatCurrency(totalBalance)} au total</p>
+          <p className="text-[#a0a0a6] text-sm mt-1">{(accounts ?? []).length} comptes &middot; {formatCurrency(totalBalance)} au total</p>
         </div>
         <Button onClick={() => setShowModal(true)}>
           <Plus size={16} className="mr-2" />
@@ -53,7 +54,7 @@ export default function AccountsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockAccounts.map((account, i) => {
+        {(accounts ?? []).map((account, i) => {
           const Icon = accountIcons[account.type] || Building2;
           const status = statusConfig[account.status];
           const StatusIcon = status.icon;

@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import Card, { CardHeader, CardTitle } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import { mockHoldings } from '@/data/mock';
+import { useHoldings } from '@/hooks/useHoldings';
 import { formatCurrency, formatPercent } from '@/lib/utils';
 
 const assetClassColors: Record<string, string> = {
@@ -35,7 +35,9 @@ function groupBy<T>(items: T[], key: (item: T) => string) {
 }
 
 export default function PortfolioPage() {
-  const holdingsWithValue = mockHoldings.map((h) => ({
+  const { data: holdings } = useHoldings();
+
+  const holdingsWithValue = (holdings ?? []).map((h) => ({
     ...h,
     value: h.quantity * h.currentPrice,
     cost: h.quantity * h.avgPrice,
@@ -141,7 +143,7 @@ export default function PortfolioPage() {
         </CardHeader>
         <div className="space-y-3">
           {sectorData.map((sector) => {
-            const pct = (sector.value / totalValue) * 100;
+            const pct = totalValue > 0 ? (sector.value / totalValue) * 100 : 0;
             return (
               <div key={sector.name}>
                 <div className="flex justify-between text-sm mb-1">
@@ -196,7 +198,7 @@ export default function PortfolioPage() {
                     </div>
                   </td>
                   <td className="py-3 text-right text-[#6b6b73]">
-                    {((h.value / totalValue) * 100).toFixed(1)}%
+                    {totalValue > 0 ? ((h.value / totalValue) * 100).toFixed(1) : 0}%
                   </td>
                 </tr>
               ))}

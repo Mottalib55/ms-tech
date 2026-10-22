@@ -7,7 +7,7 @@ import {
 import Card, { CardHeader, CardTitle } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import AnimatedNumber from '@/components/ui/AnimatedNumber';
-import { mockDividends } from '@/data/mock';
+import { useDividends } from '@/hooks/useDividends';
 import { formatCurrency, formatCurrencyDetailed, formatDate } from '@/lib/utils';
 
 const statusLabels: Record<string, { label: string; variant: 'success' | 'warning' | 'default' }> = {
@@ -22,9 +22,9 @@ const tooltipStyle = {
   borderRadius: '12px',
 };
 
-function getMonthlyDividends() {
+function getMonthlyDividends(dividends: { payDate: string; amount: number }[]) {
   const months: Record<string, number> = {};
-  mockDividends.forEach((d) => {
+  dividends.forEach((d) => {
     const month = d.payDate.slice(0, 7);
     months[month] = (months[month] || 0) + d.amount;
   });
@@ -33,23 +33,26 @@ function getMonthlyDividends() {
     .map(([month, amount]) => ({ month, amount: Math.round(amount) }));
 }
 
-const monthlyData = getMonthlyDividends();
-const totalAnnual = mockDividends.reduce((s, d) => s + d.amount, 0);
-const paidTotal = mockDividends.filter((d) => d.status === 'paid').reduce((s, d) => s + d.amount, 0);
-const upcomingTotal = mockDividends.filter((d) => d.status !== 'paid').reduce((s, d) => s + d.amount, 0);
-
-const topPayers = Object.entries(
-  mockDividends.reduce((acc, d) => {
-    acc[d.symbol] = (acc[d.symbol] || 0) + d.amount;
-    return acc;
-  }, {} as Record<string, number>)
-)
-  .sort(([, a], [, b]) => b - a)
-  .slice(0, 5);
-
 const medals = ['🥇', '🥈', '🥉', '4.', '5.'];
 
 export default function DividendsPage() {
+  const { data: dividends } = useDividends();
+  const divList = dividends ?? [];
+
+  const monthlyData = getMonthlyDividends(divList);
+  const totalAnnual = divList.reduce((s, d) => s + d.amount, 0);
+  const paidTotal = divList.filter((d) => d.status === 'paid').reduce((s, d) => s + d.amount, 0);
+  const upcomingTotal = divList.filter((d) => d.status !== 'paid').reduce((s, d) => s + d.amount, 0);
+
+  const topPayers = Object.entries(
+    divList.reduce((acc, d) => {
+      acc[d.symbol] = (acc[d.symbol] || 0) + d.amount;
+      return acc;
+    }, {} as Record<string, number>)
+  )
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5);
+
   return (
     <div className="space-y-6">
       <div className="animate-in">
@@ -152,7 +155,7 @@ export default function DividendsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[rgba(255,255,255,0.04)]">
-              {mockDividends.sort((a, b) => a.payDate.localeCompare(b.payDate)).map((d) => {
+              {[...divList].sort((a, b) => a.payDate.localeCompare(b.payDate)).map((d) => {
                 const status = statusLabels[d.status];
                 return (
                   <tr key={d.id} className="text-[#a0a0a6] hover:bg-[rgba(255,255,255,0.02)] transition-colors">

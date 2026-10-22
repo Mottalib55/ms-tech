@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard,
   Wallet,
@@ -15,14 +16,15 @@ import {
   LogOut,
   X,
   ChevronLeft,
+  Link2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/accounts', label: 'Comptes', icon: Wallet },
   { href: '/dashboard/portfolio', label: 'Portefeuille', icon: PieChart },
+  { href: '/dashboard/connections', label: 'Connexions', icon: Link2 },
   { href: '/dashboard/fees', label: 'Frais', icon: Receipt },
   { href: '/dashboard/predict', label: 'Predict', icon: TrendingUp },
   { href: '/dashboard/budget', label: 'Budget', icon: LineChart },
@@ -40,7 +42,6 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
-  const { logout } = useAuth();
 
   return (
     <>
@@ -122,7 +123,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
             {!collapsed && <span>Réduire</span>}
           </button>
           <button
-            onClick={logout}
+            onClick={() => signOut({ callbackUrl: '/login' })}
             className={cn(
               'flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm font-medium text-[#6b6b73] hover:text-[#f5f5f5] hover:bg-[rgba(255,255,255,0.04)] w-full transition-colors',
               collapsed && 'lg:justify-center lg:px-0'
