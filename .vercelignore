@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+ios
+ios-shell
+tests
+test-results
+playwright-report
+scripts
