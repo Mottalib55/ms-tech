@@ -29,6 +29,8 @@ const SERIES = [
 const annual = (f: Fee) => annualizedFee(f.amount, f.frequency);
 const percent = (n: number) => `${n.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`;
 
+const COST_SERIES = SERIES.filter((s): s is typeof s & { key: 'current' | 'optimized' } => s.key !== 'none');
+
 function project(capital: number, annualFees: number, optimizedFees: number, ratePct: number) {
   const r = ratePct / 100;
   let current = capital; let optimized = capital; let none = capital;
@@ -49,6 +51,9 @@ function Impact({ fees, capital, currency }: { fees: Fee[]; capital: number; cur
   const savings = fees.reduce((s, f) => s + feeSavings(annual(f), f.percentage, f.alternativeFee), 0);
   const data = useMemo(() => project(capital, total, total - savings, rate), [capital, total, savings, rate]);
   const y20 = data[20];
+  // Capital lost against the same savings without fees: in absolute values the curves are
+  // millions apart from zero and thousands apart from each other, so they would overlap.
+  const costs = useMemo(() => data.map((d) => ({ year: d.year, current: d.none - d.current, optimized: d.none - d.optimized })), [data]);
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -58,31 +63,31 @@ function Impact({ fees, capital, currency }: { fees: Fee[]; capital: number; cur
       </div>
       <Card className="min-w-0">
         <CardHeader className="flex-wrap gap-3 items-end">
-          <div className="min-w-0"><CardTitle>Impact sur 30 ans</CardTitle><p className="text-xs text-[#8e8e98] mt-0.5">Depuis vos {formatCurrency(capital, currency)} d&apos;actifs, frais supposés constants, sans nouveau versement.</p></div>
+          <div className="min-w-0"><CardTitle>Ce que les frais vous coûtent sur 30 ans</CardTitle><p className="text-xs text-[#8e8e98] mt-0.5">Depuis vos {formatCurrency(capital, currency)} d&apos;actifs, frais supposés constants, sans nouveau versement.</p></div>
           <div className="w-36"><Input id="fees-rate" label="Rendement annuel (%)" inputMode="decimal" value={rateText} onChange={(e) => setRateText(e.target.value)} autoComplete="off" /></div>
         </CardHeader>
         <ChartOrTable
-          label="impact des frais"
+          label="coût cumulé des frais"
           chart={
             <div>
-              <div role="img" aria-label={`Sur 30 ans : ${SERIES.map((s) => `${s.name} ${formatCurrency(data[30][s.key], currency)}`).join(', ')}`}>
+              <div role="img" aria-label={`Coût cumulé sur 30 ans : ${COST_SERIES.map((s) => `${s.name} ${formatCurrency(costs[30][s.key], currency)}`).join(', ')}`}>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
+                  <LineChart data={costs} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
                     <CartesianGrid vertical={false} stroke={gridStroke} />
                     <XAxis dataKey="year" tick={axisTick} axisLine={false} tickLine={false} minTickGap={32} tickFormatter={(y) => `${y} ans`} />
                     <YAxis tick={axisTick} axisLine={false} tickLine={false} width={56} tickFormatter={(v) => formatCompact(v, currency)} />
                     <Tooltip {...tooltipProps} labelFormatter={(y) => `Dans ${y} ans`} formatter={(v, n) => [formatCurrency(Number(v), currency), String(n)]} />
-                    {SERIES.map((s) => <Line key={s.key} type="monotone" dataKey={s.key} name={s.name} stroke={s.color} strokeWidth={2} dot={false} {...CHART_ANIM} />)}
+                    {COST_SERIES.map((s) => <Line key={s.key} type="monotone" dataKey={s.key} name={s.name} stroke={s.color} strokeWidth={2} dot={false} {...CHART_ANIM} />)}
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <Legend items={SERIES.map((s) => ({ name: s.name, color: s.color }))} />
+              <Legend items={COST_SERIES.map((s) => ({ name: s.name, color: s.color }))} />
             </div>
           }
           table={
             <div className="overflow-x-auto">
-              <table className="w-full text-sm"><thead><tr className="text-left text-xs text-[#8e8e98]"><th className="pb-2 font-medium">Horizon</th>{SERIES.map((s) => <th key={s.key} className="pb-2 font-medium text-right">{s.name}</th>)}</tr></thead>
-                <tbody>{data.filter((d) => d.year % 5 === 0).map((d) => <tr key={d.year} className="border-t border-white/[0.05] tabular-nums text-[#f5f5f5]"><td className="py-2 text-[#a0a0a6]">{d.year} ans</td>{SERIES.map((s) => <td key={s.key} className="py-2 text-right">{formatCurrency(d[s.key], currency)}</td>)}</tr>)}</tbody>
+              <table className="w-full text-sm"><thead><tr className="text-left text-xs text-[#8e8e98]"><th className="pb-2 font-medium">Horizon</th>{COST_SERIES.map((s) => <th key={s.key} className="pb-2 font-medium text-right">{s.name}</th>)}</tr></thead>
+                <tbody>{costs.filter((d) => d.year % 5 === 0).map((d) => <tr key={d.year} className="border-t border-white/[0.05] tabular-nums text-[#f5f5f5]"><td className="py-2 text-[#a0a0a6]">{d.year} ans</td>{COST_SERIES.map((s) => <td key={s.key} className="py-2 text-right">{formatCurrency(d[s.key], currency)}</td>)}</tr>)}</tbody>
               </table>
             </div>
           }
@@ -119,7 +124,7 @@ export default function FeesPage() {
                   <li key={fee.id} className="p-4 bg-white/[0.03] rounded-[12px] border border-white/[0.05]">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2"><h3 className="font-medium text-[#f5f5f5] text-sm">{fee.label}</h3><Badge>{FEE_TYPES[fee.type] ?? fee.type}</Badge></div>
+                        <div className="flex flex-wrap items-center gap-2"><h3 className="font-medium text-[#f5f5f5] text-sm">{fee.label}</h3>{(FEE_TYPES[fee.type] ?? fee.type) !== fee.label && <Badge>{FEE_TYPES[fee.type] ?? fee.type}</Badge>}</div>
                         <p className="text-xs text-[#8e8e98] mt-0.5 truncate">{fee.accountName}</p>
                       </div>
                       <div className="flex items-start gap-1 shrink-0">
