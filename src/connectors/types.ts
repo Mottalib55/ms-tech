@@ -92,6 +92,8 @@ export interface SyncCredentials {
   apiSecret?: string;
   /** The provider's id for this connection, when distinct from the token. */
   externalId?: string;
+  /** The account's language, for the rare texts a connector writes itself (the demo bank). */
+  locale?: string;
 }
 
 export interface ProviderConnector {

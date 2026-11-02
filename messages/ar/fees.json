@@ -1,0 +1,67 @@
+{
+  "title": "الرسوم",
+  "subtitle": "ما تكلفك إياه حساباتك، وما يمكنك توفيره",
+  "add": "إضافة",
+  "deleted": "تم حذف الرسوم",
+  "frequency": {
+    "annual": "سنويًا",
+    "monthly": "شهريًا",
+    "quarterly": "كل ربع سنة",
+    "per-transaction": "تقدير سنوي"
+  },
+  "type": {
+    "management": "الإدارة",
+    "transaction": "عمولة الوساطة",
+    "custody": "الحفظ",
+    "exchange": "صرف العملات",
+    "performance": "الأداء"
+  },
+  "series": {
+    "optimized": "الرسوم المحسّنة",
+    "current": "الرسوم الحالية"
+  },
+  "annualFees": "الرسوم السنوية",
+  "savings": "الوفورات الممكنة",
+  "perYear": "{amount} سنويًا",
+  "cost20": "التكلفة خلال 20 سنة",
+  "assumedReturn": "العائد المفترض: {rate}",
+  "cost30": "ما تكلفك إياه الرسوم خلال 30 سنة",
+  "basis": "انطلاقًا من أصولك البالغة {capital}، مع افتراض ثبات الرسوم وعدم إضافة مبالغ جديدة.",
+  "annualReturn": "العائد السنوي (%)",
+  "chartLabel": "التكلفة التراكمية للرسوم",
+  "chartAria": "التكلفة التراكمية خلال 30 سنة: {list}",
+  "horizon": "الأفق الزمني",
+  "emptyTitle": "لا توجد رسوم مسجلة",
+  "emptyText": "أدخل رسوم حساباتك لقياس أثرها على المدى الطويل.",
+  "detail": "تفاصيل الرسوم",
+  "deleteAria": "حذف {label}",
+  "alternative": "المعدل البديل: {alternative} مقابل {current} حاليًا.",
+  "addTitle": "إضافة رسوم",
+  "needAccount": "ترتبط الرسوم بحساب. أنشئ هذا الحساب أولًا.",
+  "createAccount": "إنشاء حساب",
+  "confirmTitle": "هل تريد حذف هذه الرسوم؟",
+  "delete": "حذف",
+  "form": {
+    "added": "تمت إضافة الرسوم",
+    "needAmount": "أدخل مبلغ الرسوم.",
+    "percentRange": "يجب أن تكون النسبة بين 0 و100.",
+    "altRange": "يجب أن يكون المعدل البديل بين 0 و100.",
+    "account": "الحساب",
+    "type": "النوع",
+    "frequency": "التكرار",
+    "freq": {
+      "annual": "سنوي",
+      "quarterly": "ربع سنوي",
+      "monthly": "شهري",
+      "per-transaction": "لكل عملية"
+    },
+    "label": "الوصف",
+    "labelPlaceholder": "رسوم الحفظ…",
+    "amountEstimated": "المبلغ السنوي التقديري",
+    "amountPerDue": "المبلغ لكل دفعة",
+    "currentRate": "المعدل الحالي (%)",
+    "altRate": "المعدل البديل (%)",
+    "optional": "اختياري",
+    "submit": "إضافة الرسوم"
+  }
+}

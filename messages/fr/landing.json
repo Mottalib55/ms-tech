@@ -1,0 +1,91 @@
+{
+  "accountNav": "Compte",
+  "signIn": "Connexion",
+  "start": "Commencer",
+  "hero": {
+    "title": "Tout votre patrimoine, sur un seul écran",
+    "text": "Reliez vos comptes ou saisissez-les à la main. Patrimoine net, répartition, frais, dividendes et projections se calculent tout seuls.",
+    "cta": "Créer mon compte",
+    "demoNote": "La démo utilise des données fictives, sans inscription.",
+    "by": "par Market Securities"
+  },
+  "preview": {
+    "aria": "Illustration de l'application avec des chiffres fictifs",
+    "netWorth": "Patrimoine net",
+    "change": "+{value} % sur 30 jours",
+    "caption": "Illustration, chiffres fictifs"
+  },
+  "features": {
+    "title": "Tout pour piloter votre patrimoine",
+    "together": {
+      "title": "Tout au même endroit",
+      "text": "Banques, courtiers, assurance-vie, crypto, immobilier et crédits : connectés automatiquement ou saisis à la main."
+    },
+    "allocation": {
+      "title": "Votre vraie répartition",
+      "text": "Par classe d'actifs, région et secteur, converti dans votre devise. Dettes déduites."
+    },
+    "fees": {
+      "title": "Vos frais, en clair",
+      "text": "Listez ce que vous payez et voyez ce que cela coûte sur vingt ans."
+    },
+    "dividends": {
+      "title": "Dividendes",
+      "text": "Versés, confirmés, à venir : le calendrier de vos revenus passifs."
+    },
+    "budget": {
+      "title": "Budget",
+      "text": "Revenus, dépenses, catégories et taux d'épargne, mois après mois."
+    },
+    "projections": {
+      "title": "Projections",
+      "text": "Une fourchette de scénarios pour votre patrimoine, plutôt qu'un seul chiffre rassurant."
+    },
+    "simulators": {
+      "title": "Simulateurs",
+      "text": "Intérêts composés, prêt immobilier, projection de patrimoine."
+    },
+    "privacy": {
+      "title": "Vos données restent à vous",
+      "text": "Clés d'accès chiffrées AES, connexions en lecture seule, export et suppression en un geste."
+    }
+  },
+  "facts": {
+    "label": "En bref",
+    "connectors": {
+      "value": "5",
+      "label": "connecteurs : Europe, Émirats, monde, crypto, courtier"
+    },
+    "scenarios": {
+      "value": "2 000",
+      "label": "scénarios par projection Monte Carlo"
+    },
+    "currencies": {
+      "value": "9",
+      "label": "devises d'affichage, dont EUR, USD, CHF et AED"
+    },
+    "gesture": {
+      "value": "1 geste",
+      "label": "pour exporter ou supprimer vos données"
+    }
+  },
+  "trust": {
+    "title": "Vos données, vos règles",
+    "readOnly": {
+      "title": "Lecture seule",
+      "text": "MS Tech lit vos soldes et positions. Il ne peut ni déplacer d'argent ni passer d'ordre."
+    },
+    "export": {
+      "title": "Export à tout moment",
+      "text": "Téléchargez l'ensemble de vos données depuis les paramètres."
+    },
+    "delete": {
+      "title": "Suppression réelle",
+      "text": "Supprimez votre compte dans l'application : vos données et connexions partent avec lui."
+    }
+  },
+  "closing": {
+    "title": "Prenez le contrôle de votre patrimoine",
+    "text": "Connectez votre banque ou saisissez un premier compte à la main."
+  }
+}

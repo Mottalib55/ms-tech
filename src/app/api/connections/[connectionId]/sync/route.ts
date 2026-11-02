@@ -8,10 +8,10 @@ export const POST = route(async (_req: Request, { params }: { params: Promise<{ 
   const { connectionId } = await params;
   await enforce(`sync:${user.id}`, 30, 300);
   const connection = await prisma.providerConnection.findFirst({ where: { id: connectionId, userId: user.id } });
-  if (!connection) throw notFound('Connexion');
+  if (!connection) throw notFound('connection');
   try {
     return await syncConnection(connectionId);
   } catch (error) {
-    throw new ApiError(502, error instanceof Error ? error.message : 'Synchronisation impossible');
+    throw new ApiError(502, error instanceof Error ? error.message : 'errors.connections.syncFailed');
   }
 });

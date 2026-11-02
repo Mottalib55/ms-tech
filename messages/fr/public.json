@@ -1,0 +1,35 @@
+{
+  "footer": {
+    "label": "Pied de page",
+    "features": "Fonctionnalités",
+    "signIn": "Connexion",
+    "terms": "CGU",
+    "privacy": "Confidentialité",
+    "mentions": "Mentions légales",
+    "disclaimer": "MS Tech est un service d'information sur votre patrimoine. Il ne constitue pas un conseil en investissement. Les performances passées ne préjugent pas des performances futures.",
+    "copyright": "© {year} MS Tech — par Market Securities."
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "text": "Cette adresse n'existe pas ou plus.",
+    "dashboard": "Mon patrimoine",
+    "home": "Accueil"
+  },
+  "error": {
+    "title": "Un problème est survenu",
+    "text": "La page n'a pas pu s'afficher. Vos données ne sont pas touchées.",
+    "retry": "Réessayer",
+    "home": "Accueil"
+  },
+  "demo": {
+    "see": "Voir la démo",
+    "preparing": "Préparation…",
+    "failed": "La démo n'a pas pu s'ouvrir. Réessayez."
+  },
+  "sandbox": {
+    "title": "Banque de démonstration",
+    "text": "Cet écran simule la page de votre banque. MS Tech demande un accès en lecture seule à vos comptes, positions et opérations.",
+    "allow": "Autoriser l'accès",
+    "deny": "Refuser"
+  }
+}

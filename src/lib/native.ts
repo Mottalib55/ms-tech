@@ -12,10 +12,10 @@ export async function biometricAvailable(): Promise<boolean> {
   return (await BiometricAuth.checkBiometry()).isAvailable;
 }
 
-export async function verifyBiometric(): Promise<boolean> {
+export async function verifyBiometric(reason: string): Promise<boolean> {
   try {
     const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth');
-    await BiometricAuth.authenticate({ reason: 'Déverrouiller MS Tech', allowDeviceCredential: true });
+    await BiometricAuth.authenticate({ reason, allowDeviceCredential: true });
     return true;
   } catch {
     return false;

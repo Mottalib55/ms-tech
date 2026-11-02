@@ -47,7 +47,7 @@ for (const route of ROUTES) {
       // Never fire the irreversible ones here: dedicated tests cover them.
       if (/déconnexion|se déconnecter|supprimer mon compte|quitter la démo/i.test(name)) continue;
       // Nothing to do by design: a link to this very page, a reset with nothing changed (tested in pages.spec).
-      if (/réinitialiser/i.test(name) || (await el.getAttribute('href')) === route) continue;
+      if (/réinitialiser/i.test(name) || (await el.getAttribute('href')) === `/fr${route}`) continue;
       const before = await signature(page);
       if ((await el.getAttribute('href'))?.startsWith('/api/')) continue;
       await el.click({ timeout: 4000 }).catch(() => dead.push(`${name} (non cliquable)`));

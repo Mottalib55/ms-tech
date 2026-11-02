@@ -1,160 +1,96 @@
 @import "tailwindcss";
 
+/* One source of colour. Everything in the app reads these names; the two themes differ only here. */
 @theme inline {
-  --color-background: #0a0a0b;
-  --color-foreground: #f5f5f5;
-  --font-sans: var(--font-geist-sans);
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-hover: var(--hover);
+  --color-accent: var(--accent);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-pos: var(--pos);
+  --color-neg: var(--neg);
+  --font-sans: var(--font-geist-sans), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* ── Root variables ── */
 :root {
-  --gold: #f4be7e;
-  --gold-light: #f9d09f;
-  --gold-dark: #d4a06a;
-  --blue: #5682f2;
-  --blue-light: #7ea0f8;
-  --bg: #0a0a0b;
-  --surface: rgba(255,255,255,0.03);
-  --surface-border: rgba(255,255,255,0.06);
-  --surface-hover: rgba(255,255,255,0.05);
-  --text-primary: #f5f5f5;
-  --text-secondary: #a0a0a6;
-  --text-tertiary: #8e8e98;
-  --positive: #34d399;
-  --negative: #f87171;
-  --brand-red: #DC2626;
-  --radius-card: 16px;
-  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f6f6f7;
+  --raised: #ffffff;
+  --hover: #ececee;
+  --line: #e8e8ea;
+  --ink: #0b0b0c;
+  --muted: #5f5f66;
+  --subtle: #6f6f76;
+  --accent: #2f5bea;
+  --primary: #0b0b0c;
+  --on-primary: #ffffff;
+  --pos: #0a7d4f;
+  --neg: #c8322b;
+  /* Asset classes: fixed order, validated against this surface (dataviz validator). */
+  --c1: #a8742f; --c2: #3f6fe0; --c3: #0f8a64; --c4: #7c55d6;
+  --c5: #c9541b; --c6: #0a83b0; --c7: #c63f7e; --c8: #7a7a22; --c9: #85858c;
 }
 
-body {
-  background: var(--bg);
-  color: var(--text-primary);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #0b0b0c; --surface: #141416; --raised: #1a1a1d; --hover: #232327; --line: #26262a;
+    --ink: #f4f4f5; --muted: #a1a1a8; --subtle: #8b8b93; --accent: #8aa4ff;
+    --primary: #ffffff; --on-primary: #0b0b0c; --pos: #34d399; --neg: #f87171;
+    --c1: #bd8a45; --c2: #5b86f0; --c3: #149b72; --c4: #8f68e8;
+    --c5: #d95f20; --c6: #1692ad; --c7: #d9508f; --c8: #8f8f2e; --c9: #7f7f88;
+  }
 }
-
-/* ── Mesh gradient background ── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(86,130,242,0.08), transparent),
-    radial-gradient(ellipse 60% 50% at 80% 50%, rgba(244,190,126,0.04), transparent),
-    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(86,130,242,0.03), transparent);
-  pointer-events: none;
-}
-
-/* ── Keyframes ── */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 8px rgba(244,190,126,0.3); }
-  50%      { box-shadow: 0 0 20px rgba(244,190,126,0.6); }
-}
-
-@keyframes sheetEnter {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes modalEnter {
-  from { opacity: 0; transform: scale(0.95) translateY(8px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-@keyframes backdropFade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes skeletonPulse {
-  0%, 100% { opacity: 0.04; }
-  50%      { opacity: 0.08; }
-}
-
-@keyframes slideIndicator {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-
-@keyframes breathe {
-  0%, 100% { opacity: 0.6; }
-  50%      { opacity: 1; }
-}
-
-/* ── Animate-in utility ── */
-.animate-in {
-  animation: fadeInUp 0.28s var(--ease-premium) both;
-}
-.animate-in-1 { animation-delay: 0.02s; }
-.animate-in-2 { animation-delay: 0.04s; }
-.animate-in-3 { animation-delay: 0.06s; }
-.animate-in-4 { animation-delay: 0.08s; }
-.animate-in-5 { animation-delay: 0.10s; }
-.animate-in-6 { animation-delay: 0.12s; }
-.animate-in-7 { animation-delay: 0.14s; }
-.animate-in-8 { animation-delay: 0.16s; }
-
-/* ── Custom scrollbar ── */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.08);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.14);
-}
-
-/* ── Recharts tooltip override ── */
-.recharts-default-tooltip {
-  background-color: rgba(20,20,22,0.92) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
-}
-
-/* ── Glass card base ── */
-.glass {
-  background: var(--surface);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--radius-card);
-  backdrop-filter: blur(12px);
-}
-
-/* ── Gold text gradient ── */
-.text-gold-gradient {
-  background: linear-gradient(116deg, #5682f2, #f9d09f);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0b0b0c; --surface: #141416; --raised: #1a1a1d; --hover: #232327; --line: #26262a;
+  --ink: #f4f4f5; --muted: #a1a1a8; --subtle: #8b8b93; --accent: #8aa4ff;
+  --primary: #ffffff; --on-primary: #0b0b0c; --pos: #34d399; --neg: #f87171;
+  --c1: #bd8a45; --c2: #5b86f0; --c3: #149b72; --c4: #8f68e8;
+  --c5: #d95f20; --c6: #1692ad; --c7: #d9508f; --c8: #8f8f2e; --c9: #7f7f88;
 }
 
 html { -webkit-text-size-adjust: 100%; }
-body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
 button, a, [role='button'] { touch-action: manipulation; }
-:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+/* Arabic font first here: Geist's fallback is Arial, which has Arabic glyphs and would win otherwise. */
+[dir='rtl'] body { font-family: var(--font-arabic), var(--font-sans); }
+/* Letter-spacing breaks Arabic joins; uppercase has no meaning there either. */
+[dir='rtl'] * { letter-spacing: 0 !important; }
+
+@keyframes sheetEnter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes backdropFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.animate-in { animation: fadeIn 0.14s ease-out both; }
+
+/* Mouse devices only: on a touch screen the system's overlay scrollbar is the right one. */
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
 }
 
-/* ── Selection color ── */
-::selection {
-  background: rgba(244,190,126,0.25);
-  color: #f5f5f5;
+.recharts-default-tooltip { border-radius: 10px !important; }
+/* Charts keep time running left to right in every language. */
+.recharts-responsive-container, .chart-ltr { direction: ltr; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

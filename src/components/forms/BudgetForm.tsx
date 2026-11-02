@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { FormError } from '@/components/ui/kit';
@@ -23,6 +24,7 @@ const currentMonth = () => new Date().toISOString().slice(0, 7);
 export default function BudgetForm({ initial, existing, currency, onDone }: {
   initial?: MonthlyBudget; existing: string[]; currency: string; onDone: () => void;
 }) {
+  const t = useTranslations('budget.form');
   const [month, setMonth] = useState(initial?.month ?? currentMonth());
   const [income, setIncome] = useState(initial ? toField(initial.income) : '');
   const [rows, setRows] = useState<Row[]>(
@@ -34,7 +36,7 @@ export default function BudgetForm({ initial, existing, currency, onDone }: {
   const [error, setError] = useState<string | null>(null);
 
   const save = useAction((body: object) => api('/api/budget', { method: 'POST', body }), {
-    success: initial ? 'Mois mis à jour' : 'Mois enregistré', onSuccess: onDone, onError: (e) => setError(e.message),
+    success: initial ? t('updated') : t('saved'), onSuccess: onDone, onError: (e) => setError(e.message),
   });
 
   const update = (key: number, patch: Partial<Row>) => setRows((r) => r.map((x) => (x.key === key ? { ...x, ...patch } : x)));
@@ -48,14 +50,14 @@ export default function BudgetForm({ initial, existing, currency, onDone }: {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!/^\d{4}-\d{2}$/.test(month)) return setError('Choisissez un mois.');
-    if (!initial && existing.includes(month)) return setError(`${formatMonth(month)} existe déjà : modifiez-le depuis l'historique.`);
+    if (!/^\d{4}-\d{2}$/.test(month)) return setError(t('pickMonth'));
+    if (!initial && existing.includes(month)) return setError(t('exists', { month: formatMonth(month) }));
     const inc = amount(income);
-    if (Number.isNaN(inc) || inc < 0) return setError('Les revenus doivent être un montant positif.');
+    if (Number.isNaN(inc) || inc < 0) return setError(t('incomePositive'));
     const filled = rows.filter((r) => r.name.trim() || r.budgeted.trim() || r.spent.trim());
-    if (filled.some((r) => !r.name.trim())) return setError('Donnez un nom à chaque catégorie.');
+    if (filled.some((r) => !r.name.trim())) return setError(t('nameEach'));
     const parsed = filled.map((r) => ({ ...r, b: amount(r.budgeted), s: amount(r.spent) }));
-    if (parsed.some((r) => Number.isNaN(r.b) || Number.isNaN(r.s) || r.b < 0 || r.s < 0)) return setError('Les montants des catégories doivent être positifs.');
+    if (parsed.some((r) => Number.isNaN(r.b) || Number.isNaN(r.s) || r.b < 0 || r.s < 0)) return setError(t('amountsPositive'));
     save.mutate({
       month,
       income: inc,
@@ -67,31 +69,31 @@ export default function BudgetForm({ initial, existing, currency, onDone }: {
     <form onSubmit={submit} noValidate className="space-y-4">
       <FormError message={error} />
       <div className="grid grid-cols-2 gap-3">
-        <Input id="budget-month" label="Mois" type="month" value={month} disabled={!!initial} onChange={(e) => setMonth(e.target.value)} />
-        <Input id="budget-income" label={`Revenus (${currency})`} inputMode="decimal" value={income} onChange={(e) => setIncome(e.target.value)} autoComplete="off" />
+        <Input id="budget-month" label={t('month')} dir="ltr" type="month" value={month} disabled={!!initial} onChange={(e) => setMonth(e.target.value)} />
+        <Input id="budget-income" label={t('income', { currency })} inputMode="decimal" value={income} onChange={(e) => setIncome(e.target.value)} autoComplete="off" />
       </div>
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium text-[#a0a0a6] mb-2">Catégories</legend>
+        <legend className="text-sm font-medium text-muted mb-2">{t('categories')}</legend>
         {rows.map((r, i) => (
-          <div key={r.key} className="p-3 bg-white/[0.03] rounded-[12px] space-y-2">
+          <div key={r.key} className="p-3 bg-surface rounded-[10px] space-y-2">
             <div className="flex items-end gap-2">
               <div className="flex-1 min-w-0">
-                <Input id={`cat-name-${r.key}`} label={`Catégorie ${i + 1}`} value={r.name} onChange={(e) => update(r.key, { name: e.target.value })} placeholder="Courses, loyer…" autoComplete="off" />
+                <Input id={`cat-name-${r.key}`} label={t('category', { n: i + 1 })} value={r.name} onChange={(e) => update(r.key, { name: e.target.value })} placeholder={t('placeholder')} autoComplete="off" />
               </div>
-              <button type="button" onClick={() => removeRow(r.key)} aria-label={`Retirer la catégorie ${i + 1}`} className="w-11 h-11 shrink-0 flex items-center justify-center text-[#a0a0a6] hover:text-[#f87171] rounded-[10px] hover:bg-white/[0.05]"><Trash2 size={16} /></button>
+              <button type="button" onClick={() => removeRow(r.key)} aria-label={t('remove', { n: i + 1 })} className="w-11 h-11 shrink-0 flex items-center justify-center text-muted hover:text-neg rounded-[10px] hover:bg-hover"><Trash2 size={16} /></button>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <Input id={`cat-budgeted-${r.key}`} label="Prévu" inputMode="decimal" value={r.budgeted} onChange={(e) => update(r.key, { budgeted: e.target.value })} autoComplete="off" />
-              <Input id={`cat-spent-${r.key}`} label="Dépensé" inputMode="decimal" value={r.spent} onChange={(e) => update(r.key, { spent: e.target.value })} autoComplete="off" />
+              <Input id={`cat-budgeted-${r.key}`} label={t('budgeted')} inputMode="decimal" value={r.budgeted} onChange={(e) => update(r.key, { budgeted: e.target.value })} autoComplete="off" />
+              <Input id={`cat-spent-${r.key}`} label={t('spent')} inputMode="decimal" value={r.spent} onChange={(e) => update(r.key, { spent: e.target.value })} autoComplete="off" />
             </div>
           </div>
         ))}
-        <Button variant="secondary" size="sm" onClick={addRow}><Plus size={14} className="mr-1" />Ajouter une catégorie</Button>
+        <Button variant="secondary" size="sm" onClick={addRow}><Plus size={14} className="me-1" />{t('addCategory')}</Button>
       </fieldset>
-      <p data-testid="budget-preview" className="text-sm text-[#a0a0a6] tabular-nums">
-        Dépenses : {formatCurrency(totalSpent, currency)} · Épargne : {formatCurrency(incomeValue - totalSpent, currency)}
+      <p data-testid="budget-preview" className="text-sm text-muted tabular-nums">
+        {t('preview', { expenses: formatCurrency(totalSpent, currency), savings: formatCurrency(incomeValue - totalSpent, currency) })}
       </p>
-      <Button type="submit" loading={save.isPending} className="w-full">{initial ? 'Enregistrer' : 'Enregistrer le mois'}</Button>
+      <Button type="submit" loading={save.isPending} className="w-full">{initial ? t('save') : t('saveMonth')}</Button>
     </form>
   );
 }

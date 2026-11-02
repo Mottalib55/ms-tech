@@ -1,0 +1,91 @@
+{
+  "loginCode": {
+    "subject": "Your MS Tech code: {code}",
+    "body": "Here is your MS Tech sign-in code, valid for 10 minutes:",
+    "ignore": "If you did not ask for this, ignore this message."
+  },
+  "reset": {
+    "subject": "Reset your MS Tech password",
+    "hello": "Hello,",
+    "body": "To choose a new password, open this link (valid for one hour):",
+    "ignore": "If you did not ask for this, ignore this message."
+  },
+  "provider": {
+    "powens": {
+      "name": "Powens (banks, savings, life insurance)",
+      "region": "France / Europe"
+    },
+    "lean": {
+      "name": "Lean (UAE, Saudi Arabia)",
+      "region": "Middle East"
+    },
+    "saltedge": {
+      "name": "Salt Edge (international banks)",
+      "region": "Worldwide"
+    },
+    "binance": {
+      "name": "Binance",
+      "region": "Worldwide"
+    },
+    "ibkr": {
+      "name": "Interactive Brokers",
+      "region": "Worldwide"
+    },
+    "sandbox": {
+      "name": "Demo bank",
+      "region": "Demo"
+    }
+  },
+  "alerts": {
+    "syncError": "{provider} sync error",
+    "budgetExceeded": "Budget exceeded: {name}",
+    "budgetDetail": "{amount} {currency} over budget.",
+    "dividendUpcoming": "{symbol} dividend coming up",
+    "dividendDetail": "{amount} {currency} on {date}.",
+    "staleTitle": "{count, plural, one {# manual account to update} other {# manual accounts to update}}",
+    "staleDetail": "Not updated for more than 3 months."
+  },
+  "leanLink": {
+    "title": "Bank connection",
+    "opening": "Opening the secure connection…"
+  },
+  "sandbox": {
+    "bank": "Demo bank",
+    "checking": "Current account",
+    "brokerage": "Brokerage account",
+    "custody": "Custody fees",
+    "custodyHint": "Several online brokers no longer charge custody fees.",
+    "salary": "Salary",
+    "salaryDesc": "Salary transfer",
+    "rent": "Rent",
+    "rentDesc": "Rent direct debit",
+    "buyCw8": "Buy CW8",
+    "buyCw8Desc": "Bought 1 CW8"
+  },
+  "demo": {
+    "userName": "Alex Demo",
+    "broker": "Example Broker",
+    "bank": "Example Bank",
+    "insurer": "Example Insurer",
+    "platform": "Example Platform",
+    "ownEstimate": "Own estimate",
+    "pea": "Stock savings plan",
+    "cto": "Brokerage account",
+    "savings": "Savings account",
+    "checking": "Current account",
+    "lifeInsurance": "Life insurance",
+    "cryptoWallet": "Crypto wallet",
+    "flat": "Lyon apartment",
+    "mortgage": "Mortgage",
+    "brokerage": "Brokerage",
+    "brokerageHint": "An online broker often charges less than 0.2% per order.",
+    "custody": "Custody fees",
+    "custodyHint": "Several brokers no longer charge them.",
+    "fxFee": "EUR/USD exchange",
+    "housing": "Housing",
+    "groceries": "Groceries",
+    "transport": "Transport",
+    "goingOut": "Going out",
+    "subscriptions": "Subscriptions"
+  }
+}

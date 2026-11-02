@@ -15,13 +15,13 @@ export const PATCH = route(async (req: Request) => {
   const user = await requireUser();
   const { currentPassword, ...data } = await parseBody(req, profileSchema);
   if (data.email && data.email !== user.email) {
-    if (user.isDemo) throw new ApiError(400, 'Indisponible en mode démo.');
+    if (user.isDemo) throw new ApiError(400, 'errors.auth.demoUnavailable');
     await enforce(`pw:${user.id}`, 10, 300);
     if (!currentPassword || !user.passwordHash || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
-      throw new ApiError(403, 'Mot de passe actuel requis pour changer d\'email.');
+      throw new ApiError(403, 'errors.auth.passwordForEmail');
     }
     if (await prisma.user.findUnique({ where: { email: data.email } })) {
-      throw new ApiError(409, 'Cet email est déjà utilisé.');
+      throw new ApiError(409, 'errors.auth.emailTaken');
     }
   }
   const updated = await prisma.user.update({ where: { id: user.id }, data });
@@ -39,7 +39,7 @@ export const DELETE = route(async (req: Request) => {
   const { password } = await parseBody(req, deleteAccountSchema);
   await enforce(`pw:${user.id}`, 10, 300);
   if (!user.passwordHash || !(await bcrypt.compare(password, user.passwordHash))) {
-    throw new ApiError(403, 'Mot de passe incorrect.');
+    throw new ApiError(403, 'errors.auth.passwordWrong');
   }
   await prisma.user.delete({ where: { id: user.id } });
   return { success: true };

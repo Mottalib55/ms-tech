@@ -1,0 +1,65 @@
+{
+  "subtitle": "Votre profil, votre sécurité et vos données",
+  "save": "Enregistrer",
+  "profile": {
+    "title": "Profil",
+    "saved": "Profil enregistré",
+    "name": "Nom",
+    "email": "E-mail",
+    "demoAccount": "Compte de démonstration",
+    "emailPassword": "Mot de passe actuel (pour changer d'e-mail)"
+  },
+  "appearance": {
+    "title": "Apparence",
+    "language": "Langue",
+    "theme": "Thème"
+  },
+  "preferences": {
+    "title": "Préférences",
+    "saved": "Devise modifiée",
+    "currency": "Devise d'affichage",
+    "note": "Vos totaux sont convertis avec des cours indicatifs. Changer de devise redémarre la courbe d'évolution du patrimoine.",
+    "confirmTitle": "Passer en {currency} ?",
+    "confirmText": "L'historique de votre courbe d'évolution sera effacé : elle repartira d'aujourd'hui dans la nouvelle devise. Vos comptes ne changent pas.",
+    "confirm": "Changer de devise"
+  },
+  "security": {
+    "title": "Sécurité",
+    "saved": "Mot de passe modifié. Vos autres appareils sont déconnectés.",
+    "tooShort": "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+    "current": "Mot de passe actuel",
+    "new": "Nouveau mot de passe",
+    "newPlaceholder": "8 caractères minimum",
+    "submit": "Changer le mot de passe"
+  },
+  "lock": {
+    "title": "Verrouillage",
+    "text": "Demander Face ID à l'ouverture de l'app.",
+    "on": "Activer",
+    "off": "Désactiver"
+  },
+  "data": {
+    "title": "Mes données",
+    "text": "Téléchargez l'ensemble de vos comptes, positions, opérations et budgets au format JSON.",
+    "export": "Exporter mes données"
+  },
+  "links": {
+    "connections": "Connexions",
+    "activeCount": "{count, plural, one {# active} other {# actives}}",
+    "terms": "Conditions générales",
+    "privacy": "Confidentialité",
+    "mentions": "Mentions légales"
+  },
+  "danger": {
+    "title": "Zone sensible",
+    "text": "Supprime définitivement votre compte, vos données et vos connexions.",
+    "delete": "Supprimer mon compte",
+    "modalTitle": "Supprimer votre compte ?",
+    "modalText": "Cette action est immédiate et irréversible. Saisissez votre mot de passe pour confirmer.",
+    "password": "Mot de passe",
+    "confirm": "Supprimer définitivement"
+  },
+  "leaveDemo": "Quitter la démo",
+  "signOut": "Se déconnecter",
+  "version": "MS Tech, version {version}"
+}

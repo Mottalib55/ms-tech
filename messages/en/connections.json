@@ -1,0 +1,56 @@
+{
+  "subtitle": "Your banks and platforms, synced automatically",
+  "connect": "Connect",
+  "addTitle": "Connect an account",
+  "emptyTitle": "No connections",
+  "emptyText": "Link a bank or a platform: balances, positions and transactions update on their own.",
+  "description": {
+    "powens": "Banks, savings and life insurance in France and Europe",
+    "lean": "Banks in the UAE and the Middle East",
+    "saltedge": "More than 5,000 banks worldwide",
+    "binance": "Crypto balances, with a read-only key",
+    "ibkr": "Multi-currency positions and balances",
+    "sandbox": "A test bank to try the whole flow"
+  },
+  "connectError": {
+    "denied": "Connection cancelled: you refused access.",
+    "expired": "This connection link has expired. Start again.",
+    "failed": "The provider couldn't complete the connection. Try again.",
+    "sync": "Account linked, but the first sync failed. The details are on the card.",
+    "generic": "Couldn't connect."
+  },
+  "connected": "{name} connected",
+  "accountFallback": "Account",
+  "established": "Connection established",
+  "soon": "Coming soon",
+  "readOnly": "Read-only access. You can remove it at any time.",
+  "keys": {
+    "binance": {
+      "intro": "On Binance, create an API key with only the “read” permission, without withdrawals or trading.",
+      "key": "API key",
+      "secret": "API secret"
+    },
+    "ibkr": {
+      "intro": "In Client Portal, open Flex Queries: create an Activity query with Open Positions, Account Information and Net Asset Value, then generate a Flex Web Service token.",
+      "key": "Flex token",
+      "secret": "Flex query number"
+    },
+    "submit": "Connect {name}",
+    "encrypted": "Credentials are encrypted and never shown again."
+  },
+  "status": {
+    "active": "Active",
+    "error": "Error",
+    "pending": "Pending"
+  },
+  "card": {
+    "synced": "{name} synced",
+    "disconnected": "{name} disconnected",
+    "accountCount": "{count, plural, one {# account} other {# accounts}}",
+    "lastSync": "last sync: {when}",
+    "sync": "Sync",
+    "disconnect": "Disconnect",
+    "confirmTitle": "Disconnect {name}?",
+    "confirmText": "Access will be removed. {accounts} and their data will no longer count towards your wealth."
+  }
+}

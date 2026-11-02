@@ -11,6 +11,6 @@ export const POST = route(async (req: Request) => {
   const user = await requireUser();
   const data = await parseBody(req, dividendSchema);
   const holding = await prisma.holding.findFirst({ where: { id: data.holdingId, account: { userId: user.id } } });
-  if (!holding) throw notFound('Position');
+  if (!holding) throw notFound('position');
   return prisma.dividend.create({ data: { ...data, symbol: holding.symbol, name: holding.name, isManual: true } });
 });

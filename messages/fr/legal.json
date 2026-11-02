@@ -1,0 +1,195 @@
+{
+  "back": "Retour",
+  "lastUpdate": "Dernière mise à jour : {date}",
+  "contactFallback": "depuis les paramètres de votre compte (export et suppression y sont en libre-service)",
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "blocks": [
+      {
+        "h": "Responsable du traitement"
+      },
+      {
+        "p": "{name}. Contact : <contact></contact>."
+      },
+      {
+        "h": "Données traitées"
+      },
+      {
+        "li": [
+          "<b>Compte</b> : nom, adresse e-mail, mot de passe sous forme hachée (bcrypt), devise choisie.",
+          "<b>Données financières</b> : comptes, soldes, positions, opérations, frais, dividendes, budgets et historique de votre patrimoine net, saisis par vous ou reçus de vos connexions.",
+          "<b>Accès aux fournisseurs</b> : jetons et clés d'API, chiffrés au repos (AES-256-GCM). Vos identifiants bancaires ne nous sont jamais transmis.",
+          "<b>Technique</b> : les cookies strictement nécessaires à la connexion et au choix de la langue, et des journaux d'erreurs serveur."
+        ]
+      },
+      {
+        "p": "Aucune publicité, aucun outil de mesure d'audience, aucun service Google. Vos données ne sont ni vendues ni utilisées à d'autres fins que de vous fournir le service."
+      },
+      {
+        "h": "Finalités et bases légales"
+      },
+      {
+        "li": [
+          "Fournir le service que vous demandez : exécution du contrat (CGU).",
+          "Accéder à vos comptes auprès d'un fournisseur : votre consentement, retirable à tout moment en le déconnectant.",
+          "Sécuriser le service (limitation des tentatives, journaux) : intérêt légitime."
+        ]
+      },
+      {
+        "h": "Destinataires"
+      },
+      {
+        "li": [
+          "<b>Vercel</b> : hébergement de l'application.",
+          "<b>Powens, Salt Edge, Lean Technologies</b> : agrégation bancaire, si vous reliez une banque.",
+          "<b>Binance, Interactive Brokers</b> : lecture de vos soldes et positions, si vous les connectez.",
+          "<b>CoinGecko</b> : cours des cryptomonnaies : ne reçoit que des noms d'actifs, aucune donnée personnelle.",
+          "<b>Frankfurter (cours de la BCE)</b> : taux de change : ne reçoit aucune donnée personnelle.",
+          "<b>Resend</b> : envoi des courriels de code de connexion et de réinitialisation de mot de passe (votre adresse)."
+        ]
+      },
+      {
+        "p": "Certains prestataires peuvent traiter des données hors de l'Union européenne, sous les garanties prévues par le RGPD (clauses contractuelles types ou décision d'adéquation)."
+      },
+      {
+        "h": "Agrégation bancaire"
+      },
+      {
+        "p": "L'agrégation bancaire passe par des prestataires agréés pour le service d'information sur les comptes. L'accès est en lecture seule : MS Tech ne peut ni déplacer d'argent ni passer d'ordre."
+      },
+      {
+        "h": "Durée de conservation"
+      },
+      {
+        "p": "Vos données sont conservées jusqu'à la suppression de votre compte, qui les efface immédiatement, connexions comprises. Les comptes de démonstration sont effacés sous 24 heures."
+      },
+      {
+        "h": "Vos droits"
+      },
+      {
+        "p": "Vous disposez des droits d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité. Dans Paramètres, vous pouvez à tout moment modifier votre profil, <b>exporter vos données</b> et <b>supprimer votre compte</b>. Pour toute autre demande : <contact></contact>. Vous pouvez aussi saisir la CNIL (cnil.fr)."
+      },
+      {
+        "h": "Sécurité"
+      },
+      {
+        "p": "Connexions chiffrées (HTTPS), mots de passe hachés, jetons chiffrés au repos, limitation des tentatives de connexion, déconnexion des autres appareils lors d'un changement de mot de passe."
+      }
+    ]
+  },
+  "terms": {
+    "title": "Conditions générales d'utilisation",
+    "blocks": [
+      {
+        "h": "1. Objet"
+      },
+      {
+        "p": "Les présentes conditions régissent l'utilisation de MS Tech, édité par {name}. Créer un compte vaut acceptation."
+      },
+      {
+        "h": "2. Service"
+      },
+      {
+        "p": "MS Tech vous permet de rassembler vos comptes, saisis à la main ou reliés à des fournisseurs tiers, et de consulter patrimoine net, répartition, frais, dividendes, budget, projections et simulations."
+      },
+      {
+        "h": "3. Pas de conseil en investissement"
+      },
+      {
+        "p": "MS Tech est un service d'information. Aucun contenu ne constitue un conseil en investissement, une recommandation personnalisée, ni un conseil fiscal ou juridique. Projections et simulations reposent sur des hypothèses que vous choisissez et n'annoncent aucun résultat. Investir comporte un risque de perte en capital ; vos décisions vous appartiennent."
+      },
+      {
+        "h": "4. Exactitude des données"
+      },
+      {
+        "p": "Les montants proviennent de vos saisies et de fournisseurs tiers. Ils peuvent être incomplets ou décalés, notamment en cas de panne d'un fournisseur. Les conversions de devises utilisent des cours indicatifs. Seuls les relevés de vos établissements font foi."
+      },
+      {
+        "h": "5. Votre compte"
+      },
+      {
+        "p": "Vous êtes responsable de la confidentialité de votre mot de passe et des clés d'API que vous confiez au service. Pour une plateforme à clés (Binance), créez une clé en lecture seule, sans droit de retrait ni de trading."
+      },
+      {
+        "h": "6. Connexions"
+      },
+      {
+        "p": "Vous autorisez l'accès en lecture à vos données auprès de chaque fournisseur que vous connectez. Vous pouvez retirer cet accès à tout moment depuis la page Connexions : les comptes concernés quittent alors votre patrimoine."
+      },
+      {
+        "h": "7. Disponibilité"
+      },
+      {
+        "p": "Nous nous efforçons de maintenir le service accessible, sans garantie d'absence d'interruption. Le service peut évoluer."
+      },
+      {
+        "h": "8. Responsabilité"
+      },
+      {
+        "p": "Dans les limites permises par la loi, {name} ne répond pas des décisions prises sur la base des informations affichées, ni des pannes de fournisseurs tiers. Rien ici ne limite vos droits de consommateur."
+      },
+      {
+        "h": "9. Résiliation"
+      },
+      {
+        "p": "Vous pouvez supprimer votre compte à tout moment dans Paramètres. La suppression est immédiate et efface vos données. Nous pouvons suspendre un compte en cas d'usage frauduleux ou abusif."
+      },
+      {
+        "h": "10. Droit applicable"
+      },
+      {
+        "p": "Ces conditions sont soumises au droit français. En cas de litige, vous pouvez recourir à la médiation de la consommation ou saisir les tribunaux compétents."
+      },
+      {
+        "h": "Contact"
+      },
+      {
+        "p": "<contact></contact>."
+      }
+    ]
+  },
+  "mentions": {
+    "title": "Mentions légales",
+    "rows": {
+      "row": "{label} : {value}",
+      "legalForm": "Forme juridique",
+      "capital": "Capital",
+      "registration": "Immatriculation",
+      "vat": "TVA intracommunautaire",
+      "address": "Adresse",
+      "director": "Directeur de la publication"
+    },
+    "blocks": [
+      {
+        "h": "Éditeur"
+      },
+      {
+        "slot": "company"
+      },
+      {
+        "p": "Contact : <contact></contact>."
+      },
+      {
+        "h": "Hébergement"
+      },
+      {
+        "p": "Application hébergée par Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis."
+      },
+      {
+        "h": "Nature du service"
+      },
+      {
+        "p": "MS Tech est un service d'information qui présente une vue d'ensemble des données financières de l'utilisateur. Il ne constitue ni un conseil en investissement, ni une recommandation personnalisée, ni un service de paiement."
+      },
+      {
+        "p": "L'agrégation bancaire passe par des prestataires agréés pour le service d'information sur les comptes. MS Tech n'a jamais accès à vos identifiants bancaires, saisis sur les pages de ces prestataires ou de votre banque."
+      },
+      {
+        "h": "Propriété intellectuelle"
+      },
+      {
+        "p": "Les éléments de l'application (textes, interface, marque) sont protégés. Toute reproduction sans autorisation est interdite."
+      }
+    ]
+  }
+}

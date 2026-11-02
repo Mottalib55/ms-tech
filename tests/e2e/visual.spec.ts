@@ -19,5 +19,5 @@ test('captures des pages publiques et des fenêtres', async ({ page }, info) => 
   await page.goto('/dashboard/connections'); await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Connecter', exact: true }).first().click(); await page.waitForTimeout(400); await shot('modal-connexion', false);
   await page.goto('/dashboard/accounts'); await page.waitForLoadState('networkidle');
-  await page.locator('main a[href^="/dashboard/accounts/"]').first().click(); await page.waitForURL(/accounts\/.+/); await page.waitForLoadState('networkidle'); await shot('compte-detail');
+  await page.locator('main a[href^="/fr/dashboard/accounts/"]').first().click(); await page.waitForURL(/accounts\/.+/); await page.waitForLoadState('networkidle'); await shot('compte-detail');
 });

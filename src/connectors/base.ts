@@ -6,6 +6,7 @@ import type {
   SyncResult,
   SyncCredentials,
 } from './types';
+import { connectorError } from './errors';
 
 export abstract class BaseConnector implements ProviderConnector {
   abstract readonly slug: ProviderSlug;
@@ -37,7 +38,7 @@ export abstract class BaseConnector implements ProviderConnector {
       // Provider bodies can echo identifiers: log them, do not store or show them.
       const text = await response.text().catch(() => '');
       console.error(`[${this.slug}] ${response.status} ${url.split('?')[0]}: ${text.slice(0, 500)}`);
-      throw new Error(`${this.displayName} a répondu avec une erreur (${response.status}).`);
+      throw connectorError('http', { provider: this.displayName, status: response.status });
     }
 
     return response.json() as Promise<T>;

@@ -1,0 +1,65 @@
+{
+  "title": "Dividends",
+  "subtitle": "Payments received and upcoming",
+  "add": "Add",
+  "deleted": "Dividend deleted",
+  "status": {
+    "paid": "Paid",
+    "confirmed": "Confirmed",
+    "projected": "Projected"
+  },
+  "frequency": {
+    "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "semi-annual": "Semi-annual",
+    "annual": "Annual"
+  },
+  "chartLabel": "dividends by month",
+  "chartAria": "{count, plural, one {Dividends by month over {count} month} other {Dividends by month over {count} months}}",
+  "tooltip": "Dividends",
+  "col": {
+    "month": "Month",
+    "amount": "Amount",
+    "asset": "Asset",
+    "status": "Status",
+    "frequency": "Frequency",
+    "ex": "Ex-date",
+    "pay": "Payment",
+    "actions": "Actions"
+  },
+  "deleteAria": "Delete the {symbol} dividend of {date}",
+  "emptyTitle": "No dividends",
+  "emptyText": "Add the dividends from your positions to track your passive income and next payments.",
+  "statTotal": "Last 12 months + upcoming",
+  "statPaid": "Paid over 12 months",
+  "statUpcoming": "Upcoming",
+  "byMonth": "Dividends by month",
+  "limited": "Chart limited to dividends in {currency}.",
+  "payers": "Top payers",
+  "calendar": "Calendar",
+  "addTitle": "Add a dividend",
+  "needPosition": "A dividend is linked to a position. First add the position that pays it.",
+  "goPortfolio": "Go to portfolio",
+  "confirmTitle": "Delete this dividend?",
+  "confirmText": "{symbol}: {amount} on {date}.",
+  "delete": "Delete",
+  "form": {
+    "added": "Dividend added",
+    "needAmount": "Enter the dividend amount.",
+    "dates": "The ex-date must come before the payment date.",
+    "position": "Position",
+    "amount": "Total amount",
+    "currency": "Currency",
+    "ex": "Ex-date",
+    "pay": "Payment",
+    "status": "Status",
+    "frequency": "Frequency",
+    "freq": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semi-annual": "Semi-annual",
+      "annual": "Annual"
+    },
+    "submit": "Add the dividend"
+  }
+}

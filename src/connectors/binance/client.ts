@@ -1,5 +1,6 @@
 import { createHmac } from 'node:crypto';
 import { BaseConnector } from '../base';
+import { connectorError } from '../errors';
 import { round2 } from '../signing';
 import type { CallbackResult, ConnectionInitResult, NormalizedHolding, ProviderSlug, SyncCredentials, SyncResult } from '../types';
 
@@ -18,7 +19,7 @@ const DOLLARS = new Set(['USDT', 'USDC', 'BUSD', 'FDUSD', 'TUSD', 'DAI', 'USD'])
 class BinanceConnector extends BaseConnector {
   readonly slug: ProviderSlug = 'binance';
   readonly displayName = 'Binance';
-  readonly region = 'Monde';
+  readonly region = 'world';
 
   isConfigured() {
     return true;
@@ -29,11 +30,11 @@ class BinanceConnector extends BaseConnector {
   }
 
   async handleCallback(): Promise<CallbackResult> {
-    throw new Error('Binance se connecte par clé API, sans redirection.');
+    throw connectorError('noRedirect', { provider: this.displayName });
   }
 
   async sync({ accessToken: apiKey, apiSecret }: SyncCredentials): Promise<SyncResult> {
-    if (!apiKey || !apiSecret) throw new Error('Clé et secret API Binance requis.');
+    if (!apiKey || !apiSecret) throw connectorError('binanceKeysRequired');
 
     const query = `omitZeroBalances=true&recvWindow=10000&timestamp=${Date.now()}`;
     const signature = createHmac('sha256', apiSecret).update(query).digest('hex');
@@ -70,8 +71,8 @@ class BinanceConnector extends BaseConnector {
         currentPrice: price,
         currency: 'USD',
         assetClass: DOLLARS.has(b.asset) ? 'cash' : 'crypto',
-        sector: 'Crypto',
-        region: 'Monde',
+        sector: 'crypto',
+        region: 'world',
         dailyChange: 0,
       });
     }

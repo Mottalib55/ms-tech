@@ -1,5 +1,8 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
 import { version } from './package.json';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const CSP = [
   "default-src 'self'",
@@ -55,4 +58,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

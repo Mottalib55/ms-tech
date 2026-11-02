@@ -1,0 +1,10 @@
+{
+  "view": "العرض: {label}",
+  "chart": "رسم بياني",
+  "table": "جدول",
+  "allocationAria": "التوزيع: {list}",
+  "years": "{count, plural, zero {{count} سنة} one {سنة واحدة} two {سنتان} few {{count} سنوات} many {{count} سنة} other {{count} سنة}}",
+  "yearShort": "{count} س",
+  "yearLabel": "السنة {year}",
+  "inYears": "{count, plural, zero {بعد {count} سنة} one {بعد سنة واحدة} two {بعد سنتين} few {بعد {count} سنوات} many {بعد {count} سنة} other {بعد {count} سنة}}"
+}

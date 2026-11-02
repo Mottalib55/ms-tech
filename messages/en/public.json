@@ -1,0 +1,35 @@
+{
+  "footer": {
+    "label": "Footer",
+    "features": "Features",
+    "signIn": "Sign in",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "mentions": "Legal notice",
+    "disclaimer": "MS Tech is an information service about your wealth. It is not investment advice. Past performance does not predict future performance.",
+    "copyright": "© {year} MS Tech — by Market Securities."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "This page doesn't exist or is no longer available.",
+    "dashboard": "My wealth",
+    "home": "Home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "text": "The page couldn't be displayed. Your data has not been affected.",
+    "retry": "Try again",
+    "home": "Home"
+  },
+  "demo": {
+    "see": "See the demo",
+    "preparing": "Preparing…",
+    "failed": "The demo couldn't open. Please try again."
+  },
+  "sandbox": {
+    "title": "Demo bank",
+    "text": "This screen simulates your bank's page. MS Tech is asking for read-only access to your accounts, positions and transactions.",
+    "allow": "Allow access",
+    "deny": "Decline"
+  }
+}

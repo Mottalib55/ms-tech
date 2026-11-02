@@ -13,7 +13,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label htmlFor={id} className="block text-sm font-medium text-[#a0a0a6]">
+          <label htmlFor={id} className="block text-sm font-medium text-muted">
             {label}
           </label>
         )}
@@ -21,15 +21,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={id}
           className={cn(
-            'w-full h-11 px-4 bg-[#0a0a0b] border border-[rgba(255,255,255,0.12)] rounded-[12px] text-base sm:text-sm text-[#f5f5f5] placeholder-[#8e8e98]',
-            'focus:outline-none focus:ring-2 focus:ring-[#f4be7e]/30 focus:border-[#f4be7e]/40',
-            'transition-all duration-[250ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
-            error && 'border-[#f87171] focus:ring-[#f87171]/30',
+            'w-full h-11 px-3.5 bg-bg border border-line rounded-[10px] text-base sm:text-sm text-ink placeholder-subtle',
+            'focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent',
+            'transition-colors duration-100',
+            error && 'border-neg focus:border-neg focus:ring-neg',
             className
           )}
           {...props}
         />
-        {error && <p className="text-sm text-[#f87171]">{error}</p>}
+        {error && <p className="text-sm text-neg">{error}</p>}
       </div>
     );
   }

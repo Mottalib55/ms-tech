@@ -18,7 +18,7 @@ export default function Sparkline({
   if (!data.length) return null;
 
   const isPositive = positive ?? data[data.length - 1] >= data[0];
-  const color = isPositive ? '#34d399' : '#f87171';
+  const color = isPositive ? 'var(--pos)' : 'var(--neg)';
   const min = Math.min(...data);
   const max = Math.max(...data);
   const range = max - min || 1;

@@ -35,8 +35,8 @@ export default function ProgressRing({
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#5682f2" />
-            <stop offset="100%" stopColor="#f4be7e" />
+            <stop offset="0%" stopColor="var(--c2)" />
+            <stop offset="100%" stopColor="var(--accent)" />
           </linearGradient>
         </defs>
         {/* Track */}
@@ -45,7 +45,7 @@ export default function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.06)"
+          stroke="var(--line)"
           strokeWidth={strokeWidth}
         />
         {/* Progress */}
@@ -65,8 +65,8 @@ export default function ProgressRing({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl font-bold text-[#f5f5f5]">{Math.round(value)}</span>
-        {label && <span className="text-[10px] text-[#8e8e98] mt-0.5">{label}</span>}
+        <span className="text-xl font-semibold text-ink">{Math.round(value)}</span>
+        {label && <span className="text-[10px] text-subtle mt-0.5">{label}</span>}
       </div>
     </div>
   );

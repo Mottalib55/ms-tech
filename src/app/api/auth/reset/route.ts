@@ -11,7 +11,7 @@ export const POST = route(async (req: Request) => {
   const user = await prisma.user.findFirst({
     where: { resetTokenHash: createHash('sha256').update(token).digest('hex'), resetTokenExpires: { gt: new Date() } },
   });
-  if (!user) throw new ApiError(400, 'Ce lien n\'est plus valable. Demandez-en un nouveau.');
+  if (!user) throw new ApiError(400, 'errors.auth.linkExpired');
   await prisma.user.update({
     where: { id: user.id },
     data: { passwordHash: await bcrypt.hash(password, 12), resetTokenHash: null, resetTokenExpires: null, tokenVersion: { increment: 1 } },

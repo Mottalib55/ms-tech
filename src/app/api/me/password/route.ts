@@ -6,11 +6,11 @@ import { enforce } from '@/server/limiter';
 
 export const POST = route(async (req: Request) => {
   const user = await requireUser();
-  if (user.isDemo) throw new ApiError(400, 'Indisponible en mode démo.');
+  if (user.isDemo) throw new ApiError(400, 'errors.auth.demoUnavailable');
   await enforce(`pw:${user.id}`, 10, 300);
   const { currentPassword, newPassword } = await parseBody(req, passwordSchema);
   if (!user.passwordHash || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
-    throw new ApiError(403, 'Mot de passe actuel incorrect.');
+    throw new ApiError(403, 'errors.auth.currentPasswordWrong');
   }
   // Bumping the version signs out every other device.
   const updated = await prisma.user.update({

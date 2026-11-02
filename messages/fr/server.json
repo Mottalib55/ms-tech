@@ -1,0 +1,91 @@
+{
+  "loginCode": {
+    "subject": "Votre code MS Tech : {code}",
+    "body": "Voici votre code de connexion à MS Tech, valable 10 minutes :",
+    "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message."
+  },
+  "reset": {
+    "subject": "Réinitialisez votre mot de passe MS Tech",
+    "hello": "Bonjour,",
+    "body": "Pour choisir un nouveau mot de passe, ouvrez ce lien (valable une heure) :",
+    "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message."
+  },
+  "provider": {
+    "powens": {
+      "name": "Powens (banques, PEA, assurance-vie)",
+      "region": "France / Europe"
+    },
+    "lean": {
+      "name": "Lean (Émirats, Arabie saoudite)",
+      "region": "Moyen-Orient"
+    },
+    "saltedge": {
+      "name": "Salt Edge (banques internationales)",
+      "region": "Monde"
+    },
+    "binance": {
+      "name": "Binance",
+      "region": "Monde"
+    },
+    "ibkr": {
+      "name": "Interactive Brokers",
+      "region": "Monde"
+    },
+    "sandbox": {
+      "name": "Banque de démonstration",
+      "region": "Démonstration"
+    }
+  },
+  "alerts": {
+    "syncError": "Synchronisation {provider} en erreur",
+    "budgetExceeded": "Budget dépassé : {name}",
+    "budgetDetail": "{amount} {currency} au-delà du prévu.",
+    "dividendUpcoming": "Dividende {symbol} à venir",
+    "dividendDetail": "{amount} {currency} le {date}.",
+    "staleTitle": "{count, plural, one {# compte manuel à actualiser} other {# comptes manuels à actualiser}}",
+    "staleDetail": "Non mis à jour depuis plus de 3 mois."
+  },
+  "leanLink": {
+    "title": "Connexion bancaire",
+    "opening": "Ouverture de la connexion sécurisée…"
+  },
+  "sandbox": {
+    "bank": "Banque de démonstration",
+    "checking": "Compte courant",
+    "brokerage": "PEA",
+    "custody": "Droits de garde",
+    "custodyHint": "Plusieurs courtiers en ligne ne facturent plus de droits de garde.",
+    "salary": "Salaire",
+    "salaryDesc": "Virement salaire",
+    "rent": "Loyer",
+    "rentDesc": "Prélèvement loyer",
+    "buyCw8": "Achat CW8",
+    "buyCw8Desc": "Achat 1 CW8"
+  },
+  "demo": {
+    "userName": "Alexandre Démo",
+    "broker": "Courtier Exemple",
+    "bank": "Banque Exemple",
+    "insurer": "Assureur Exemple",
+    "platform": "Plateforme Exemple",
+    "ownEstimate": "Estimation personnelle",
+    "pea": "PEA",
+    "cto": "Compte-titres",
+    "savings": "Livret A",
+    "checking": "Compte courant",
+    "lifeInsurance": "Assurance-vie",
+    "cryptoWallet": "Portefeuille crypto",
+    "flat": "Appartement Lyon",
+    "mortgage": "Crédit immobilier",
+    "brokerage": "Courtage",
+    "brokerageHint": "Un courtier en ligne facture souvent moins de 0,2 % par ordre.",
+    "custody": "Droits de garde",
+    "custodyHint": "Plusieurs courtiers n'en facturent plus.",
+    "fxFee": "Change EUR/USD",
+    "housing": "Logement",
+    "groceries": "Courses",
+    "transport": "Transports",
+    "goingOut": "Sorties",
+    "subscriptions": "Abonnements"
+  }
+}

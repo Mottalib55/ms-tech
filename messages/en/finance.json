@@ -1,0 +1,48 @@
+{
+  "assetClass": {
+    "stocks": "Stocks",
+    "etf": "ETFs",
+    "crypto": "Crypto",
+    "real-estate": "Real estate",
+    "bonds": "Bonds",
+    "cash": "Cash",
+    "commodities": "Commodities",
+    "insurance": "Life insurance",
+    "other": "Other"
+  },
+  "accountType": {
+    "bank": "Bank / savings",
+    "brokerage": "Brokerage",
+    "insurance": "Life insurance",
+    "crypto": "Crypto",
+    "real-estate": "Real estate",
+    "other": "Other asset",
+    "loan": "Loan / debt"
+  },
+  "sector": {
+    "other": "Other",
+    "diversified": "Diversified",
+    "energy": "Energy",
+    "industry": "Industrials",
+    "technology": "Technology",
+    "bonds": "Fixed income",
+    "crypto": "Crypto",
+    "luxury": "Luxury"
+  },
+  "region": {
+    "world": "Worldwide",
+    "other": "Other",
+    "france": "France",
+    "us": "United States",
+    "europe": "Europe",
+    "middleEast": "Middle East",
+    "demo": "Demo"
+  },
+  "period": {
+    "1M": "1M",
+    "3M": "3M",
+    "6M": "6M",
+    "1A": "1Y",
+    "5A": "5Y"
+  }
+}

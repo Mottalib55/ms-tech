@@ -1,0 +1,41 @@
+{
+  "title": "Projections",
+  "subtitle": "{count} market scenarios simulated from your assumptions",
+  "field": {
+    "currentAge": "Current age",
+    "retirementAge": "Target age",
+    "currentCapital": "Current capital ({currency})",
+    "monthlyContribution": "Monthly savings ({currency})",
+    "expectedReturn": "Expected annual return (%)",
+    "volatility": "Annual volatility (%)",
+    "inflation": "Inflation (%)",
+    "targetAmount": "Goal ({currency})"
+  },
+  "reachedAt": "Goal reached at",
+  "age": "age {age}",
+  "ageTick": "{age}",
+  "atAge": "At age {age}",
+  "notReached": "Not reached",
+  "medianScenario": "In the median scenario",
+  "notBefore": "Not before age {age} in the median scenario",
+  "medianAt": "Median capital at age {age}",
+  "range": "Likely range",
+  "rangeHint": "8 scenarios out of 10 fall within this range",
+  "assumptions": "Your assumptions",
+  "reset": "Reset",
+  "evolution": "Projected trajectory",
+  "invalidAge": "The target age must be above your current age.",
+  "chartLabel": "projected trajectory",
+  "aria": "Median capital of {amount} at age {age}",
+  "median": "Median scenario",
+  "goal": "Goal",
+  "rangeLegend": "Likely range (8 scenarios out of 10)",
+  "col": {
+    "age": "Age",
+    "low": "Low",
+    "median": "Median",
+    "high": "High"
+  },
+  "disclaimer": "A statistical projection, not investment advice or a guarantee of results. Amounts in constant {unit}, that is, adjusted for inflation.",
+  "euros": "euros"
+}

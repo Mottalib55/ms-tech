@@ -1,0 +1,67 @@
+{
+  "title": "Frais",
+  "subtitle": "Ce que vos comptes vous coûtent, et ce que vous pourriez économiser",
+  "add": "Ajouter",
+  "deleted": "Frais supprimés",
+  "frequency": {
+    "annual": "par an",
+    "monthly": "par mois",
+    "quarterly": "par trimestre",
+    "per-transaction": "estimation annuelle"
+  },
+  "type": {
+    "management": "Gestion",
+    "transaction": "Courtage",
+    "custody": "Droits de garde",
+    "exchange": "Change",
+    "performance": "Performance"
+  },
+  "series": {
+    "optimized": "Frais optimisés",
+    "current": "Frais actuels"
+  },
+  "annualFees": "Frais annuels",
+  "savings": "Économies possibles",
+  "perYear": "{amount}/an",
+  "cost20": "Coût sur 20 ans",
+  "assumedReturn": "Rendement supposé : {rate}",
+  "cost30": "Ce que les frais vous coûtent sur 30 ans",
+  "basis": "Depuis vos {capital} d'actifs, frais supposés constants, sans nouveau versement.",
+  "annualReturn": "Rendement annuel (%)",
+  "chartLabel": "coût cumulé des frais",
+  "chartAria": "Coût cumulé sur 30 ans : {list}",
+  "horizon": "Horizon",
+  "emptyTitle": "Aucun frais enregistré",
+  "emptyText": "Saisissez les frais de vos comptes pour mesurer leur poids sur le long terme.",
+  "detail": "Détail des frais",
+  "deleteAria": "Supprimer {label}",
+  "alternative": "Taux alternatif : {alternative} contre {current} aujourd'hui.",
+  "addTitle": "Ajouter des frais",
+  "needAccount": "Des frais se rattachent à un compte. Créez d'abord ce compte.",
+  "createAccount": "Créer un compte",
+  "confirmTitle": "Supprimer ces frais ?",
+  "delete": "Supprimer",
+  "form": {
+    "added": "Frais ajoutés",
+    "needAmount": "Indiquez le montant des frais.",
+    "percentRange": "Le pourcentage doit être compris entre 0 et 100.",
+    "altRange": "Le taux alternatif doit être compris entre 0 et 100.",
+    "account": "Compte",
+    "type": "Type",
+    "frequency": "Fréquence",
+    "freq": {
+      "annual": "Annuelle",
+      "quarterly": "Trimestrielle",
+      "monthly": "Mensuelle",
+      "per-transaction": "Par opération"
+    },
+    "label": "Libellé",
+    "labelPlaceholder": "Droits de garde…",
+    "amountEstimated": "Montant annuel estimé",
+    "amountPerDue": "Montant par échéance",
+    "currentRate": "Taux actuel (%)",
+    "altRate": "Taux alternatif (%)",
+    "optional": "Facultatif",
+    "submit": "Ajouter les frais"
+  }
+}

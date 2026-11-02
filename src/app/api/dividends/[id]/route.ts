@@ -5,6 +5,6 @@ export const DELETE = route(async (_req: Request, { params }: { params: Promise<
   const user = await requireUser();
   const { id } = await params;
   const { count } = await prisma.dividend.deleteMany({ where: { id, holding: { account: { userId: user.id } } } });
-  if (!count) throw notFound('Dividende');
+  if (!count) throw notFound('dividend');
   return { success: true };
 });

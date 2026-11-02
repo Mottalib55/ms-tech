@@ -1,0 +1,65 @@
+{
+  "subtitle": "Your profile, your security and your data",
+  "save": "Save",
+  "profile": {
+    "title": "Profile",
+    "saved": "Profile saved",
+    "name": "Name",
+    "email": "Email",
+    "demoAccount": "Demo account",
+    "emailPassword": "Current password (to change your email)"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "language": "Language",
+    "theme": "Theme"
+  },
+  "preferences": {
+    "title": "Preferences",
+    "saved": "Currency changed",
+    "currency": "Display currency",
+    "note": "Your totals are converted at indicative rates. Changing currency restarts your wealth chart.",
+    "confirmTitle": "Switch to {currency}?",
+    "confirmText": "Your wealth chart's history will be erased: it will restart from today in the new currency. Your accounts do not change.",
+    "confirm": "Change currency"
+  },
+  "security": {
+    "title": "Security",
+    "saved": "Password changed. Your other devices are signed out.",
+    "tooShort": "The new password must be at least 8 characters.",
+    "current": "Current password",
+    "new": "New password",
+    "newPlaceholder": "At least 8 characters",
+    "submit": "Change password"
+  },
+  "lock": {
+    "title": "App lock",
+    "text": "Ask for Face ID when the app opens.",
+    "on": "Turn on",
+    "off": "Turn off"
+  },
+  "data": {
+    "title": "My data",
+    "text": "Download all your accounts, positions, transactions and budgets as JSON.",
+    "export": "Export my data"
+  },
+  "links": {
+    "connections": "Connections",
+    "activeCount": "{count} active",
+    "terms": "Terms and conditions",
+    "privacy": "Privacy",
+    "mentions": "Legal notice"
+  },
+  "danger": {
+    "title": "Danger zone",
+    "text": "Permanently deletes your account, your data and your connections.",
+    "delete": "Delete my account",
+    "modalTitle": "Delete your account?",
+    "modalText": "This takes effect immediately and cannot be undone. Enter your password to confirm.",
+    "password": "Password",
+    "confirm": "Delete permanently"
+  },
+  "leaveDemo": "Leave the demo",
+  "signOut": "Sign out",
+  "version": "MS Tech, version {version}"
+}

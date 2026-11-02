@@ -5,7 +5,8 @@ import { enforce } from '@/server/limiter';
 import { getConnector } from '@/connectors/registry';
 import { encrypt } from '@/server/encryption';
 import { syncConnection } from '@/server/sync';
-import { appOrigin, availableProviders, hashState, newState } from '@/server/connections';
+import { appOrigin, hashState, localizedProviders, newState } from '@/server/connections';
+import { translate } from '@/server/i18n';
 import { connectKeysSchema, connectProviderSchema } from '@/server/validations';
 
 export const GET = route(async () => {
@@ -19,19 +20,22 @@ export const GET = route(async () => {
       _count: { select: { financialAccounts: true } },
     },
   });
-  return { connections, providers: availableProviders(user.isDemo) };
+  return {
+    connections: await Promise.all(connections.map(async (c) => ({ ...c, lastSyncError: c.lastSyncError && await translate(c.lastSyncError) }))),
+    providers: await localizedProviders(user.isDemo),
+  };
 });
 
 export const POST = route(async (req: Request) => {
   const user = await requireUser();
   await enforce(`connect:${user.id}`, 20, 300);
   const body = (await req.json().catch(() => null)) as { provider?: string } | null;
-  if (!body) throw new ApiError(400, 'Requête invalide');
+  if (!body) throw new ApiError(400, 'errors.badRequest');
 
   if (body.provider === 'binance' || body.provider === 'ibkr') {
     const { provider, apiKey, apiSecret } = connectKeysSchema.parse(body);
-    const available = availableProviders(user.isDemo).find((p) => p.slug === provider);
-    if (!available?.configured) throw new ApiError(503, `${available?.name ?? provider} n'est pas encore activé sur cette plateforme.`);
+    const available = (await localizedProviders(user.isDemo)).find((p) => p.slug === provider);
+    if (!available?.configured) throw new ApiError(503, 'errors.connections.notEnabled', { name: available?.name ?? provider });
     const connection = await prisma.providerConnection.create({
       data: {
         userId: user.id, provider, status: 'pending', externalId: `${provider}-${randomUUID()}`,
@@ -44,16 +48,16 @@ export const POST = route(async (req: Request) => {
       // Credentials the provider refuses are not worth keeping: say so and leave nothing behind.
       await prisma.providerConnection.delete({ where: { id: connection.id } });
       throw new ApiError(400, provider === 'binance'
-        ? 'Binance a refusé ces clés. Vérifiez la clé, le secret et l\'autorisation « lecture ».'
-        : 'Interactive Brokers a refusé ces identifiants. Vérifiez le jeton et le numéro de requête Flex.');
+        ? 'errors.connections.binanceRefused'
+        : 'errors.connections.ibkrRefused');
     }
     return { connectionId: connection.id, type: 'done' };
   }
 
   const { provider } = connectProviderSchema.parse(body);
-  const available = availableProviders(user.isDemo).find((p) => p.slug === provider);
-  if (!available) throw new ApiError(403, 'Ce fournisseur n\'est pas disponible.');
-  if (!available.configured) throw new ApiError(503, `${available.name} n'est pas encore activé sur cette plateforme.`);
+  const available = (await localizedProviders(user.isDemo)).find((p) => p.slug === provider);
+  if (!available) throw new ApiError(403, 'errors.connections.unavailable');
+  if (!available.configured) throw new ApiError(503, 'errors.connections.notEnabled', { name: available.name });
 
   const connector = getConnector(provider);
   const state = newState();

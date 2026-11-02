@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "title": "MS Tech — Wealth management",
+    "description": "All your wealth on one screen: accounts, allocation, fees, dividends, budget and projections."
+  },
+  "language": "Language",
+  "close": "Close",
+  "closeMessage": "Dismiss message",
+  "loading": "Loading",
+  "loadError": "Couldn't load this data",
+  "retry": "Try again",
+  "cancel": "Cancel",
+  "demoBanner": "Demo mode: sample data, deleted within 24 hours.",
+  "createAccount": "Create my account",
+  "theme": {
+    "label": "Theme",
+    "system": "Automatic",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "search": {
+    "title": "Search",
+    "short": "Search…",
+    "aria": "Search for an account, a position or a page",
+    "placeholder": "Account, position, page…",
+    "none": "No results for “{text}”",
+    "page": "Page",
+    "account": "Account",
+    "position": "Position"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "count": "Notifications: {count}",
+    "empty": "Nothing to report. You'll be alerted here to sync errors, budget overruns and upcoming dividends."
+  },
+  "lock": {
+    "title": "MS Tech is locked",
+    "failed": "Identification failed.",
+    "unlock": "Unlock",
+    "reason": "Unlock MS Tech"
+  }
+}

@@ -286,3 +286,12 @@ model SyncLog {
 
   @@index([connectionId])
 }
+
+// One-time code to sign in without a password. Only a hash is stored; one live code per address.
+model LoginCode {
+  email     String   @id
+  codeHash  String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

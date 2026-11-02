@@ -1,0 +1,56 @@
+{
+  "subtitle": "Vos banques et plateformes, synchronisées automatiquement",
+  "connect": "Connecter",
+  "addTitle": "Connecter un compte",
+  "emptyTitle": "Aucune connexion",
+  "emptyText": "Reliez une banque ou une plateforme : soldes, positions et opérations se mettent à jour tout seuls.",
+  "description": {
+    "powens": "Banques, PEA, assurance-vie en France et en Europe",
+    "lean": "Banques aux Émirats et au Moyen-Orient",
+    "saltedge": "Plus de 5 000 banques dans le monde",
+    "binance": "Soldes crypto, avec une clé en lecture seule",
+    "ibkr": "Positions et soldes multi-devises",
+    "sandbox": "Une fausse banque pour essayer le parcours complet"
+  },
+  "connectError": {
+    "denied": "Connexion annulée : vous avez refusé l'accès.",
+    "expired": "Ce lien de connexion a expiré. Recommencez.",
+    "failed": "Le fournisseur n'a pas pu finaliser la connexion. Réessayez.",
+    "sync": "Compte relié, mais la première synchronisation a échoué. Le détail figure sur la carte.",
+    "generic": "Connexion impossible."
+  },
+  "connected": "{name} connecté",
+  "accountFallback": "Compte",
+  "established": "Connexion établie",
+  "soon": "Bientôt disponible",
+  "readOnly": "Accès en lecture seule. Vous pouvez le retirer à tout moment.",
+  "keys": {
+    "binance": {
+      "intro": "Créez sur Binance une clé API avec la seule autorisation « lecture », sans retrait ni trading.",
+      "key": "Clé API",
+      "secret": "Secret API"
+    },
+    "ibkr": {
+      "intro": "Dans le Client Portal, ouvrez Flex Queries : créez une requête Activity avec Open Positions, Account Information et Net Asset Value, puis générez un jeton Flex Web Service.",
+      "key": "Jeton Flex",
+      "secret": "Numéro de la requête Flex"
+    },
+    "submit": "Connecter {name}",
+    "encrypted": "Identifiants chiffrés, jamais affichés à nouveau."
+  },
+  "status": {
+    "active": "Actif",
+    "error": "Erreur",
+    "pending": "En attente"
+  },
+  "card": {
+    "synced": "{name} synchronisé",
+    "disconnected": "{name} déconnecté",
+    "accountCount": "{count, plural, one {# compte} other {# comptes}}",
+    "lastSync": "dernière sync : {when}",
+    "sync": "Synchroniser",
+    "disconnect": "Déconnecter",
+    "confirmTitle": "Déconnecter {name} ?",
+    "confirmText": "L'accès sera retiré. {accounts} et leurs données quitteront votre patrimoine."
+  }
+}

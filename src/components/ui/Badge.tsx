@@ -9,16 +9,16 @@ interface BadgeProps {
 
 export default function Badge({ children, variant = 'default', className }: BadgeProps) {
   const variants = {
-    default: 'bg-[rgba(255,255,255,0.06)] text-[#a0a0a6] border-[rgba(255,255,255,0.06)]',
-    success: 'bg-[#34d399]/10 text-[#34d399] border-[#34d399]/15',
-    warning: 'bg-[#f4be7e]/10 text-[#f4be7e] border-[#f4be7e]/15',
-    danger: 'bg-[#f87171]/10 text-[#f87171] border-[#f87171]/15',
-    gold: 'bg-[#f4be7e]/10 text-[#f4be7e] border-[#f4be7e]/20',
+    default: 'bg-hover text-muted',
+    success: 'bg-pos/10 text-pos',
+    warning: 'bg-accent/10 text-accent',
+    danger: 'bg-neg/10 text-neg',
+    gold: 'bg-accent/10 text-accent',
   };
 
   return (
     <span className={cn(
-      'inline-flex items-center px-2.5 py-0.5 rounded-[8px] text-[11px] font-medium border',
+      'inline-flex items-center px-2.5 py-0.5 rounded-[6px] text-[11px] font-medium',
       variants[variant],
       className
     )}>

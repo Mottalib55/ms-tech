@@ -1,0 +1,65 @@
+{
+  "title": "Dividendes",
+  "subtitle": "Versements reçus et à venir",
+  "add": "Ajouter",
+  "deleted": "Dividende supprimé",
+  "status": {
+    "paid": "Versé",
+    "confirmed": "Confirmé",
+    "projected": "Prévu"
+  },
+  "frequency": {
+    "monthly": "Mensuel",
+    "quarterly": "Trimestriel",
+    "semi-annual": "Semestriel",
+    "annual": "Annuel"
+  },
+  "chartLabel": "dividendes par mois",
+  "chartAria": "{count, plural, one {Dividendes par mois sur {count} mois} other {Dividendes par mois sur {count} mois}}",
+  "tooltip": "Dividendes",
+  "col": {
+    "month": "Mois",
+    "amount": "Montant",
+    "asset": "Actif",
+    "status": "Statut",
+    "frequency": "Fréquence",
+    "ex": "Détachement",
+    "pay": "Paiement",
+    "actions": "Actions"
+  },
+  "deleteAria": "Supprimer le dividende {symbol} du {date}",
+  "emptyTitle": "Aucun dividende",
+  "emptyText": "Ajoutez les dividendes de vos positions pour suivre vos revenus passifs et vos prochains versements.",
+  "statTotal": "12 derniers mois + à venir",
+  "statPaid": "Versés sur 12 mois",
+  "statUpcoming": "À venir",
+  "byMonth": "Dividendes par mois",
+  "limited": "Graphique limité aux dividendes en {currency}.",
+  "payers": "Principaux payeurs",
+  "calendar": "Calendrier",
+  "addTitle": "Ajouter un dividende",
+  "needPosition": "Un dividende se rattache à une position. Ajoutez d'abord la position qui le verse.",
+  "goPortfolio": "Aller au portefeuille",
+  "confirmTitle": "Supprimer ce dividende ?",
+  "confirmText": "{symbol} : {amount} du {date}.",
+  "delete": "Supprimer",
+  "form": {
+    "added": "Dividende ajouté",
+    "needAmount": "Indiquez le montant du dividende.",
+    "dates": "La date de détachement doit précéder la date de paiement.",
+    "position": "Position",
+    "amount": "Montant total",
+    "currency": "Devise",
+    "ex": "Détachement",
+    "pay": "Paiement",
+    "status": "Statut",
+    "frequency": "Fréquence",
+    "freq": {
+      "monthly": "Mensuelle",
+      "quarterly": "Trimestrielle",
+      "semi-annual": "Semestrielle",
+      "annual": "Annuelle"
+    },
+    "submit": "Ajouter le dividende"
+  }
+}

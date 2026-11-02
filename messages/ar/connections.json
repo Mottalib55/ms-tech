@@ -1,0 +1,56 @@
+{
+  "subtitle": "بنوكك ومنصاتك، متزامنة تلقائيًا",
+  "connect": "ربط",
+  "addTitle": "ربط حساب",
+  "emptyTitle": "لا توجد عمليات ربط",
+  "emptyText": "اربط بنكًا أو منصة: تتحدّث الأرصدة والمراكز والعمليات تلقائيًا.",
+  "description": {
+    "powens": "بنوك وادخار وتأمين على الحياة في فرنسا وأوروبا",
+    "lean": "بنوك في الإمارات والشرق الأوسط",
+    "saltedge": "أكثر من 5,000 بنك حول العالم",
+    "binance": "أرصدة العملات المشفرة بمفتاح للقراءة فقط",
+    "ibkr": "مراكز وأرصدة متعددة العملات",
+    "sandbox": "بنك تجريبي لاختبار المسار كاملًا"
+  },
+  "connectError": {
+    "denied": "تم إلغاء الربط: لقد رفضت منح الوصول.",
+    "expired": "انتهت صلاحية رابط الربط هذا. ابدأ من جديد.",
+    "failed": "تعذّر على المزوّد إتمام الربط. أعد المحاولة.",
+    "sync": "تم ربط الحساب، لكن المزامنة الأولى فشلت. التفاصيل على البطاقة.",
+    "generic": "تعذّر الربط."
+  },
+  "connected": "تم ربط {name}",
+  "accountFallback": "الحساب",
+  "established": "تم إنشاء الربط",
+  "soon": "قريبًا",
+  "readOnly": "وصول للقراءة فقط. يمكنك إلغاؤه في أي وقت.",
+  "keys": {
+    "binance": {
+      "intro": "أنشئ على Binance مفتاح API بصلاحية «القراءة» فقط، دون سحب أو تداول.",
+      "key": "مفتاح API",
+      "secret": "سرّ API"
+    },
+    "ibkr": {
+      "intro": "في Client Portal، افتح Flex Queries: أنشئ استعلام Activity يتضمن Open Positions وAccount Information وNet Asset Value، ثم أنشئ رمز Flex Web Service.",
+      "key": "رمز Flex",
+      "secret": "رقم استعلام Flex"
+    },
+    "submit": "ربط {name}",
+    "encrypted": "بيانات الاعتماد مشفّرة ولن تُعرض مرة أخرى."
+  },
+  "status": {
+    "active": "نشط",
+    "error": "خطأ",
+    "pending": "قيد الانتظار"
+  },
+  "card": {
+    "synced": "تمت مزامنة {name}",
+    "disconnected": "تم إلغاء ربط {name}",
+    "accountCount": "{count, plural, =0 {لا حسابات} one {حساب واحد} two {حسابان} few {{count} حسابات} many {{count} حسابًا} other {{count} حساب}}",
+    "lastSync": "آخر مزامنة: {when}",
+    "sync": "مزامنة",
+    "disconnect": "إلغاء الربط",
+    "confirmTitle": "إلغاء ربط {name}؟",
+    "confirmText": "سيُلغى الوصول. وسيُستبعد من ثروتك ما يلي مع بياناته: {accounts}."
+  }
+}

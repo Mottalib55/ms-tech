@@ -1,4 +1,4 @@
-import { parseAmount } from '@/lib/utils';
+import { parseAmount, toInputNumber } from '@/lib/utils';
 
 /** A simulator input as a usable number: empty, negative or garbage never reaches a formula. */
 export function toNumber(text: string, max = 1e12): number {
@@ -6,4 +6,4 @@ export function toNumber(text: string, max = 1e12): number {
   return Number.isNaN(n) ? 0 : Math.min(max, Math.max(0, n));
 }
 
-export const toField = (n: number) => String(n).replace('.', ',');
+export const toField = toInputNumber;

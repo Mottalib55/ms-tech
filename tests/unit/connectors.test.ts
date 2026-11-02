@@ -139,8 +139,8 @@ describe('saltedge', () => {
   it('refuses a connection id belonging to someone else or an unsealed owner', async () => {
     const sig = seal('saltedge|u1');
     mockFetch(() => ({ data: { customer_identifier: 'other' } }));
-    await expect(saltedge.handleCallback({ connection_id: 'c', owner: 'u1', sig })).rejects.toThrow('autre client');
-    await expect(saltedge.handleCallback({ connection_id: 'c', owner: 'u2', sig })).rejects.toThrow('non authentifié');
+    await expect(saltedge.handleCallback({ connection_id: 'c', owner: 'u1', sig })).rejects.toThrow('otherCustomer');
+    await expect(saltedge.handleCallback({ connection_id: 'c', owner: 'u2', sig })).rejects.toThrow('unauthenticatedReturn');
     mockFetch(() => ({ data: { customer_identifier: 'u1' } }));
     await expect(saltedge.handleCallback({ connection_id: 'c', owner: 'u1', sig })).resolves.toEqual({ externalId: 'c', accessToken: 'c' });
   });
@@ -196,7 +196,7 @@ describe('lean', () => {
     const params = Object.fromEntries(new URL(success).searchParams);
     expect(params.state).toBe('ST');
     await expect(lean.handleCallback(params)).resolves.toEqual({ externalId: 'cust', accessToken: 'cust' });
-    await expect(lean.handleCallback({ ...params, customer_id: 'other' })).rejects.toThrow('non authentifié');
+    await expect(lean.handleCallback({ ...params, customer_id: 'other' })).rejects.toThrow('unauthenticatedReturn');
   });
 
   it('reads the documented account, balance and transaction shapes', async () => {
@@ -227,7 +227,7 @@ describe('lean', () => {
       if (url.includes('/entities')) return [{ id: 'e1' }];
       return { status: 'CONSENT_EXPIRED', data: {} };
     });
-    await expect(lean.sync({ accessToken: 'cust' })).rejects.toThrow('consentement');
+    await expect(lean.sync({ accessToken: 'cust' })).rejects.toThrow('consentExpired');
   });
 
   it('verifies sha512= HMAC signatures', () => {
@@ -270,7 +270,7 @@ describe('binance', () => {
   it('reports refused keys', async () => {
     mockFetch(() => json({ code: -2015, msg: 'Invalid API-key' }, 401));
     await expect(binance.sync({ accessToken: 'k', apiSecret: 's' })).rejects.toThrow('401');
-    await expect(binance.sync({ accessToken: 'k' })).rejects.toThrow('requis');
+    await expect(binance.sync({ accessToken: 'k' })).rejects.toThrow('binanceKeysRequired');
   });
 });
 

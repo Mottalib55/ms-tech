@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "title": "MS Tech — Gestion de patrimoine",
+    "description": "Tout votre patrimoine sur un seul écran : comptes, répartition, frais, dividendes, budget et projections."
+  },
+  "language": "Langue",
+  "close": "Fermer",
+  "closeMessage": "Fermer le message",
+  "loading": "Chargement",
+  "loadError": "Impossible de charger ces données",
+  "retry": "Réessayer",
+  "cancel": "Annuler",
+  "demoBanner": "Mode démo : données fictives, supprimées sous 24 h.",
+  "createAccount": "Créer mon compte",
+  "theme": {
+    "label": "Thème",
+    "system": "Automatique",
+    "light": "Clair",
+    "dark": "Sombre"
+  },
+  "search": {
+    "title": "Rechercher",
+    "short": "Rechercher…",
+    "aria": "Rechercher un compte, une position, une page",
+    "placeholder": "Compte, position, page…",
+    "none": "Aucun résultat pour « {text} »",
+    "page": "Page",
+    "account": "Compte",
+    "position": "Position"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "count": "Notifications : {count}",
+    "empty": "Rien à signaler. Vous serez prévenu ici en cas d'erreur de synchronisation, de budget dépassé ou de dividende à venir."
+  },
+  "lock": {
+    "title": "MS Tech est verrouillé",
+    "failed": "Identification non aboutie.",
+    "unlock": "Déverrouiller",
+    "reason": "Déverrouiller MS Tech"
+  }
+}

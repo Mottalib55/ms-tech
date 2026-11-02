@@ -1,0 +1,67 @@
+{
+  "title": "Fees",
+  "subtitle": "What your accounts cost you, and what you could save",
+  "add": "Add",
+  "deleted": "Fees deleted",
+  "frequency": {
+    "annual": "per year",
+    "monthly": "per month",
+    "quarterly": "per quarter",
+    "per-transaction": "annual estimate"
+  },
+  "type": {
+    "management": "Management",
+    "transaction": "Brokerage",
+    "custody": "Custody",
+    "exchange": "Currency exchange",
+    "performance": "Performance"
+  },
+  "series": {
+    "optimized": "Optimised fees",
+    "current": "Current fees"
+  },
+  "annualFees": "Annual fees",
+  "savings": "Possible savings",
+  "perYear": "{amount}/yr",
+  "cost20": "Cost over 20 years",
+  "assumedReturn": "Assumed return: {rate}",
+  "cost30": "What fees cost you over 30 years",
+  "basis": "Starting from your {capital} of assets, with fees assumed constant and no new contributions.",
+  "annualReturn": "Annual return (%)",
+  "chartLabel": "cumulative cost of fees",
+  "chartAria": "Cumulative cost over 30 years: {list}",
+  "horizon": "Horizon",
+  "emptyTitle": "No fees recorded",
+  "emptyText": "Enter your account fees to see their impact over the long term.",
+  "detail": "Fees in detail",
+  "deleteAria": "Delete {label}",
+  "alternative": "Alternative rate: {alternative} against {current} today.",
+  "addTitle": "Add fees",
+  "needAccount": "Fees are linked to an account. First create that account.",
+  "createAccount": "Create an account",
+  "confirmTitle": "Delete these fees?",
+  "delete": "Delete",
+  "form": {
+    "added": "Fees added",
+    "needAmount": "Enter the fee amount.",
+    "percentRange": "The percentage must be between 0 and 100.",
+    "altRange": "The alternative rate must be between 0 and 100.",
+    "account": "Account",
+    "type": "Type",
+    "frequency": "Frequency",
+    "freq": {
+      "annual": "Annual",
+      "quarterly": "Quarterly",
+      "monthly": "Monthly",
+      "per-transaction": "Per transaction"
+    },
+    "label": "Description",
+    "labelPlaceholder": "Custody fee…",
+    "amountEstimated": "Estimated annual amount",
+    "amountPerDue": "Amount per payment",
+    "currentRate": "Current rate (%)",
+    "altRate": "Alternative rate (%)",
+    "optional": "Optional",
+    "submit": "Add the fees"
+  }
+}

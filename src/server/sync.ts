@@ -101,10 +101,11 @@ export async function persistSyncResult(connectionId: string, userId: string, re
 /** The one way a connection gets refreshed: button, cron, webhook and first connection. */
 export async function syncConnection(connectionId: string) {
   const connection = await prisma.providerConnection.findUnique({ where: { id: connectionId } });
-  if (!connection) throw new Error('Connexion introuvable');
-  if (!connection.accessTokenEnc) throw new Error('Cette connexion n\'a pas été finalisée. Reconnectez le compte.');
+  if (!connection) throw new Error('errors.notFound.connection');
+  if (!connection.accessTokenEnc) throw new Error('errors.connector.notFinalized');
   const started = Date.now();
   const connector = getConnector(connection.provider as ProviderSlug);
+  const owner = await prisma.user.findUnique({ where: { id: connection.userId }, select: { language: true } });
   try {
     let accessToken = await decrypt(connection.accessTokenEnc);
     if (connection.tokenExpiresAt && connection.tokenExpiresAt < new Date() && connection.refreshTokenEnc) {
@@ -123,10 +124,11 @@ export async function syncConnection(connectionId: string) {
       accessToken,
       apiSecret: connection.apiSecretEnc ? await decrypt(connection.apiSecretEnc) : undefined,
       externalId: connection.externalId ?? undefined,
+      locale: owner?.language,
     });
     return await persistSyncResult(connectionId, connection.userId, result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur inconnue';
+    const message = error instanceof Error ? error.message : 'errors.connector.unknown';
     await prisma.providerConnection.update({
       where: { id: connectionId },
       data: { status: 'error', lastSyncAt: new Date(), lastSyncStatus: 'error', lastSyncError: message },

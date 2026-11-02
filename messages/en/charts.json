@@ -1,0 +1,10 @@
+{
+  "view": "View: {label}",
+  "chart": "Chart",
+  "table": "Table",
+  "allocationAria": "Allocation: {list}",
+  "years": "{count, plural, one {{count} year} other {{count} years}}",
+  "yearShort": "{count} y",
+  "yearLabel": "Year {year}",
+  "inYears": "{count, plural, one {In {count} year} other {In {count} years}}"
+}

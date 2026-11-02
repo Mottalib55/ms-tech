@@ -32,7 +32,7 @@ test('depuis la démo, « Créer mon compte » mène à un vrai compte, vide', a
   await page.getByRole('link', { name: 'Créer mon compte' }).click();
   await page.waitForURL('**/register');
   await page.getByLabel('Nom').fill('Ex Démo');
-  await page.getByLabel('Email').fill(uniqueEmail());
+  await page.getByLabel(/^e-?mail/i).fill(uniqueEmail());
   await page.getByLabel('Mot de passe', { exact: false }).first().fill(PASSWORD);
   await page.getByRole('button', { name: /créer mon compte/i }).click();
   await page.waitForURL('**/dashboard');
@@ -96,11 +96,11 @@ test('paramètres : profil et devise persistent, mot de passe changé, données 
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel(/mot de passe/i).fill('un-nouveau-secret-9');
   await dialog.getByRole('button', { name: /supprimer/i }).click();
-  await page.waitForURL(/\/(login)?(\?.*)?$/);
+  await page.waitForURL(/\/fr(\/login)?(\?.*)?$/);
 
   await context.clearCookies();
   await page.goto('/login');
-  await page.getByLabel('Email').fill(email);
+  await page.getByLabel(/^e-?mail/i).fill(email);
   await page.getByLabel('Mot de passe', { exact: false }).first().fill('un-nouveau-secret-9');
   await page.getByRole('button', { name: /se connecter/i }).click();
   await expect(page.getByRole('alert').filter({ hasText: /incorrect/i })).toBeVisible();
@@ -112,7 +112,7 @@ test('changer de mot de passe déconnecte les autres appareils', async ({ page, 
   const other = await browser.newContext({ baseURL });
   const device = await other.newPage();
   await device.goto('/login');
-  await device.getByLabel('Email').fill(email);
+  await device.getByLabel(/^e-?mail/i).fill(email);
   await device.getByLabel('Mot de passe', { exact: false }).first().fill(PASSWORD);
   await device.getByRole('button', { name: /se connecter/i }).click();
   await device.waitForURL('**/dashboard');

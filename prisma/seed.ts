@@ -10,7 +10,7 @@ async function main() {
   const user = await prisma.user.create({
     data: { name: 'Alexandre Démo', email, passwordHash: await bcrypt.hash('demo1234', 12), isDemo: true },
   });
-  await createDemoData(user.id);
+  await createDemoData(user.id, 'fr');
   console.log(`Prêt : ${email} / demo1234`);
 }
 

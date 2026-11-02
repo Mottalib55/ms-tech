@@ -1,0 +1,91 @@
+{
+  "loginCode": {
+    "subject": "رمز MS Tech الخاص بك: {code}",
+    "body": "هذا رمز تسجيل الدخول إلى MS Tech، وهو صالح لمدة 10 دقائق:",
+    "ignore": "إذا لم تطلب ذلك، فتجاهل هذه الرسالة."
+  },
+  "reset": {
+    "subject": "أعد تعيين كلمة مرور MS Tech",
+    "hello": "مرحبًا،",
+    "body": "لاختيار كلمة مرور جديدة، افتح هذا الرابط (صالح لمدة ساعة):",
+    "ignore": "إذا لم تطلب ذلك، فتجاهل هذه الرسالة."
+  },
+  "provider": {
+    "powens": {
+      "name": "Powens (بنوك، ادخار، تأمين على الحياة)",
+      "region": "فرنسا / أوروبا"
+    },
+    "lean": {
+      "name": "Lean (الإمارات، السعودية)",
+      "region": "الشرق الأوسط"
+    },
+    "saltedge": {
+      "name": "Salt Edge (بنوك دولية)",
+      "region": "عالمي"
+    },
+    "binance": {
+      "name": "Binance",
+      "region": "عالمي"
+    },
+    "ibkr": {
+      "name": "Interactive Brokers",
+      "region": "عالمي"
+    },
+    "sandbox": {
+      "name": "بنك تجريبي",
+      "region": "تجريبي"
+    }
+  },
+  "alerts": {
+    "syncError": "خطأ في مزامنة {provider}",
+    "budgetExceeded": "تم تجاوز الميزانية: {name}",
+    "budgetDetail": "{amount} {currency} أعلى من الميزانية المخططة.",
+    "dividendUpcoming": "توزيع أرباح قادم: {symbol}",
+    "dividendDetail": "{amount} {currency} في {date}.",
+    "staleTitle": "{count, plural, one {حساب يدوي واحد بحاجة إلى تحديث} two {حسابان يدويان بحاجة إلى تحديث} few {{count} حسابات يدوية بحاجة إلى تحديث} many {{count} حسابًا يدويًا بحاجة إلى تحديث} other {{count} حساب يدوي بحاجة إلى تحديث}}",
+    "staleDetail": "لم يُحدَّث منذ أكثر من 3 أشهر."
+  },
+  "leanLink": {
+    "title": "الربط البنكي",
+    "opening": "جارٍ فتح الاتصال الآمن…"
+  },
+  "sandbox": {
+    "bank": "بنك تجريبي",
+    "checking": "حساب جارٍ",
+    "brokerage": "حساب وساطة",
+    "custody": "رسوم الحفظ",
+    "custodyHint": "لم يعد عدد من الوسطاء عبر الإنترنت يفرضون رسوم حفظ.",
+    "salary": "الراتب",
+    "salaryDesc": "تحويل الراتب",
+    "rent": "الإيجار",
+    "rentDesc": "خصم الإيجار",
+    "buyCw8": "شراء CW8",
+    "buyCw8Desc": "شراء 1 CW8"
+  },
+  "demo": {
+    "userName": "مستخدم تجريبي",
+    "broker": "وسيط تجريبي",
+    "bank": "بنك تجريبي",
+    "insurer": "شركة تأمين تجريبية",
+    "platform": "منصة تجريبية",
+    "ownEstimate": "تقدير شخصي",
+    "pea": "حساب ادخار بالأسهم",
+    "cto": "حساب وساطة",
+    "savings": "حساب ادخار",
+    "checking": "حساب جارٍ",
+    "lifeInsurance": "تأمين على الحياة",
+    "cryptoWallet": "محفظة عملات مشفرة",
+    "flat": "شقة في ليون",
+    "mortgage": "قرض عقاري",
+    "brokerage": "عمولة الوساطة",
+    "brokerageHint": "غالبًا ما يفرض الوسيط عبر الإنترنت أقل من 0.2% على كل أمر.",
+    "custody": "رسوم الحفظ",
+    "custodyHint": "لم يعد عدد من الوسطاء يفرضونها.",
+    "fxFee": "صرف EUR/USD",
+    "housing": "السكن",
+    "groceries": "البقالة",
+    "transport": "المواصلات",
+    "goingOut": "الترفيه",
+    "subscriptions": "الاشتراكات"
+  }
+}

@@ -1,5 +1,6 @@
 import { createSign } from 'node:crypto';
 import { BaseConnector } from '../base';
+import { connectorError, isHttpStatus } from '../errors';
 import { seal, sealOk, withQuery } from '../signing';
 import type {
   CallbackResult, ConnectionInitResult, NormalizedAccount, NormalizedTransaction, ProviderSlug, SyncCredentials, SyncResult,
@@ -41,8 +42,8 @@ const NATURES: Record<string, string> = {
  */
 class SaltEdgeConnector extends BaseConnector {
   readonly slug: ProviderSlug = 'saltedge';
-  readonly displayName = 'Salt Edge (banques internationales)';
-  readonly region = 'Monde';
+  readonly displayName = 'Salt Edge';
+  readonly region = 'world';
 
   isConfigured() {
     return !!(process.env.SALTEDGE_APP_ID && process.env.SALTEDGE_SECRET);
@@ -94,7 +95,7 @@ class SaltEdgeConnector extends BaseConnector {
       await this.post('/customers', { identifier: userId });
     } catch (error) {
       // 409 DuplicatedCustomer: this user already has one, which is what we want.
-      if (!(error instanceof Error && error.message.includes('(409)'))) throw error;
+      if (!isHttpStatus(error, 409)) throw error;
     }
   }
 
@@ -119,11 +120,11 @@ class SaltEdgeConnector extends BaseConnector {
 
   async handleCallback(params: Record<string, string>): Promise<CallbackResult> {
     const { connection_id: id, owner, sig } = params;
-    if (!id) throw new Error('Salt Edge n\'a pas renvoyé de connexion.');
-    if (!owner || !sealOk(`saltedge|${owner}`, sig)) throw new Error('Retour Salt Edge non authentifié.');
+    if (!id) throw connectorError('noConnection', { provider: this.displayName });
+    if (!owner || !sealOk(`saltedge|${owner}`, sig)) throw connectorError('unauthenticatedReturn', { provider: this.displayName });
     // The id is on a URL the user could edit: the connection must belong to them.
     const { data } = await this.get<{ data: { customer_identifier?: string } }>(`${BASE_URL}/connections/${encodeURIComponent(id)}`);
-    if (data.customer_identifier !== owner) throw new Error('Cette connexion appartient à un autre client.');
+    if (data.customer_identifier !== owner) throw connectorError('otherCustomer');
     return { externalId: id, accessToken: id };
   }
 
@@ -137,8 +138,8 @@ class SaltEdgeConnector extends BaseConnector {
       return {
         externalId: a.id,
         name: a.name,
-        // VERIFY: extra.provider_name is not on the v6 Account sample; "Banque" is the fallback.
-        institution: a.extra?.provider_name || 'Banque',
+        // VERIFY: extra.provider_name is not on the v6 Account sample; "Bank" is the fallback.
+        institution: a.extra?.provider_name || 'Bank',
         type,
         balance: type === 'loan' ? Math.abs(a.balance) : a.balance,
         currency: a.currency_code,

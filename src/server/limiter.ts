@@ -41,7 +41,7 @@ export async function hit(key: string, limit: number, windowSeconds: number): Pr
 
 export async function enforce(key: string, limit: number, windowSeconds: number) {
   if (!(await hit(key, limit, windowSeconds))) {
-    throw new ApiError(429, 'Trop de tentatives. Patientez un instant puis réessayez.');
+    throw new ApiError(429, 'errors.rateLimited');
   }
 }
 

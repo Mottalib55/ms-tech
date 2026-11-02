@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (data.error_class) {
       await prisma.providerConnection.update({
         where: { id: connection.id },
-        data: { status: 'error', lastSyncError: 'La banque a signalé une erreur. Reconnectez le compte.' },
+        data: { status: 'error', lastSyncError: 'errors.connector.bankReported' },
       });
     } else if (data.stage === 'finish' || data.stage === 'success') {
       await syncConnection(connection.id).catch((e) => console.error('[saltedge] webhook sync', e));

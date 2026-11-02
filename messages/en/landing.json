@@ -1,0 +1,91 @@
+{
+  "accountNav": "Account",
+  "signIn": "Sign in",
+  "start": "Get started",
+  "hero": {
+    "title": "All your wealth, on one screen",
+    "text": "Link your accounts or enter them by hand. Net worth, allocation, fees, dividends and projections are calculated automatically.",
+    "cta": "Create my account",
+    "demoNote": "The demo uses sample data and needs no sign-up.",
+    "by": "by Market Securities"
+  },
+  "preview": {
+    "aria": "Illustration of the app with made-up figures",
+    "netWorth": "Net worth",
+    "change": "+{value}% over 30 days",
+    "caption": "Illustration, made-up figures"
+  },
+  "features": {
+    "title": "Everything you need to manage your wealth",
+    "together": {
+      "title": "All in one place",
+      "text": "Banks, brokers, life insurance, crypto, property and loans: connected automatically or entered by hand."
+    },
+    "allocation": {
+      "title": "Your true allocation",
+      "text": "By asset class, region and sector, converted into your currency, with debts deducted."
+    },
+    "fees": {
+      "title": "Your fees, in plain sight",
+      "text": "List what you pay and see what it costs over twenty years."
+    },
+    "dividends": {
+      "title": "Dividends",
+      "text": "Paid, confirmed, upcoming: the calendar of your passive income."
+    },
+    "budget": {
+      "title": "Budget",
+      "text": "Income, spending, categories and savings rate, month after month."
+    },
+    "projections": {
+      "title": "Projections",
+      "text": "A range of scenarios for your wealth, rather than one reassuring number."
+    },
+    "simulators": {
+      "title": "Simulators",
+      "text": "Compound interest, mortgage, wealth projection."
+    },
+    "privacy": {
+      "title": "Your data stays yours",
+      "text": "AES-encrypted access keys, read-only connections, export and deletion in one tap."
+    }
+  },
+  "facts": {
+    "label": "At a glance",
+    "connectors": {
+      "value": "5",
+      "label": "connectors: Europe, Emirates, global, crypto, broker"
+    },
+    "scenarios": {
+      "value": "2,000",
+      "label": "scenarios per Monte Carlo projection"
+    },
+    "currencies": {
+      "value": "9",
+      "label": "display currencies, including EUR, USD, CHF and AED"
+    },
+    "gesture": {
+      "value": "1 tap",
+      "label": "to export or delete your data"
+    }
+  },
+  "trust": {
+    "title": "Your data, your rules",
+    "readOnly": {
+      "title": "Read-only",
+      "text": "MS Tech reads your balances and positions. It cannot move money or place orders."
+    },
+    "export": {
+      "title": "Export at any time",
+      "text": "Download all of your data from the settings."
+    },
+    "delete": {
+      "title": "Real deletion",
+      "text": "Delete your account in the app: your data and connections go with it."
+    }
+  },
+  "closing": {
+    "title": "Take control of your wealth",
+    "text": "Connect your bank or enter a first account by hand."
+  }
+}

@@ -1,4 +1,5 @@
 import { BaseConnector } from '../base';
+import { connectorError } from '../errors';
 import { round2, seal, sealOk, withQuery } from '../signing';
 import type {
   CallbackResult, ConnectionInitResult, NormalizedAccount, NormalizedTransaction, ProviderSlug, SyncCredentials, SyncResult,
@@ -40,8 +41,8 @@ const PERMISSIONS = ['identity', 'accounts', 'balance', 'transactions'];
  */
 class LeanConnector extends BaseConnector {
   readonly slug: ProviderSlug = 'lean';
-  readonly displayName = 'Lean (Émirats, Arabie saoudite)';
-  readonly region = 'Moyen-Orient';
+  readonly displayName = 'Lean';
+  readonly region = 'middleEast';
 
   private get base() {
     // Sandbox: https://sandbox.leantech.me. Production: https://api2.leantech.me per the
@@ -73,7 +74,7 @@ class LeanConnector extends BaseConnector {
     });
     if (!res.ok) {
       console.error(`[lean] token ${res.status}`);
-      throw new Error(`${this.displayName} a répondu avec une erreur (${res.status}).`);
+      throw connectorError('http', { provider: this.displayName, status: res.status });
     }
     return ((await res.json()) as { access_token: string }).access_token;
   }
@@ -109,15 +110,15 @@ class LeanConnector extends BaseConnector {
 
   async handleCallback(params: Record<string, string>): Promise<CallbackResult> {
     const { customer_id: customerId, sig } = params;
-    if (!customerId || !sealOk(`lean|${customerId}`, sig)) throw new Error('Retour Lean non authentifié.');
+    if (!customerId || !sealOk(`lean|${customerId}`, sig)) throw connectorError('unauthenticatedReturn', { provider: this.displayName });
     return { externalId: customerId, accessToken: customerId };
   }
 
   private checked<T>(res: LeanResult<T>): T {
     if (res.status === 'CONSENT_EXPIRED' || res.status === 'RECONNECT_REQUIRED') {
-      throw new Error('Lean : le consentement a expiré, reconnectez le compte.');
+      throw connectorError('consentExpired', { provider: this.displayName });
     }
-    if (res.status === 'FAILED') throw new Error('Lean n\'a pas pu récupérer les données.');
+    if (res.status === 'FAILED') throw connectorError('fetchFailed', { provider: this.displayName });
     return res.data;
   }
 
@@ -147,8 +148,8 @@ class LeanConnector extends BaseConnector {
         const isDebt = /loan|mortgage|credit/i.test(a.account_sub_type ?? '');
         accounts.push({
           externalId: a.account_id,
-          name: a.nickname || a.description || a.account_holder_name || 'Compte',
-          institution: entity.bank_identifier || 'Banque',
+          name: a.nickname || a.description || a.account_holder_name || 'Account',
+          institution: entity.bank_identifier || 'Bank',
           type: isDebt ? 'loan' : 'bank',
           balance: round2(isDebt ? Math.abs(signed) : signed),
           currency,

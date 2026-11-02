@@ -7,7 +7,7 @@ export const uniqueEmail = () => `e2e-${randomBytes(6).toString('hex')}@test.loc
 export async function register(page: Page, email = uniqueEmail(), name = 'Camille Test') {
   await page.goto('/register');
   await page.getByLabel('Nom').fill(name);
-  await page.getByLabel('Email').fill(email);
+  await page.getByLabel(/^e-?mail/i).fill(email);
   await page.getByLabel('Mot de passe', { exact: false }).first().fill(PASSWORD);
   await page.getByRole('button', { name: /créer mon compte/i }).click();
   await page.waitForURL('**/dashboard', { timeout: 30_000 });

@@ -1,0 +1,10 @@
+{
+  "view": "Affichage : {label}",
+  "chart": "Graphique",
+  "table": "Tableau",
+  "allocationAria": "Répartition : {list}",
+  "years": "{count, plural, one {{count} an} other {{count} ans}}",
+  "yearShort": "{count} a",
+  "yearLabel": "Année {year}",
+  "inYears": "{count, plural, one {Dans {count} an} other {Dans {count} ans}}"
+}

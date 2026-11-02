@@ -8,7 +8,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 async function owned(userId: string, id: string) {
   const holding = await prisma.holding.findFirst({ where: { id, account: { userId } } });
-  if (!holding) throw notFound('Position');
+  if (!holding) throw notFound('position');
   return holding;
 }
 

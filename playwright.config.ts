@@ -23,15 +23,16 @@ export default defineConfig({
   workers: process.env.CI ? 1 : 2,
   retries: 0,
   reporter: [['list'], ['json', { outputFile: 'test-results/report.json' }]],
-  use: { baseURL: `http://localhost:${PORT}`, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
+  // French browsers: the historic flows below read French labels. i18n.spec.ts covers the other languages.
+  use: { baseURL: `http://localhost:${PORT}`, locale: 'fr-FR', trace: 'retain-on-failure', screenshot: 'only-on-failure' },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
-    { name: 'iphone', use: { ...devices['iPhone 15 Pro'] } },
-    { name: 'iphone-se', use: { ...devices['iPhone SE'] } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], locale: 'fr-FR', viewport: { width: 1440, height: 900 } } },
+    { name: 'iphone', use: { ...devices['iPhone 15 Pro'], locale: 'fr-FR' } },
+    { name: 'iphone-se', use: { ...devices['iPhone SE'], locale: 'fr-FR' } },
   ],
   webServer: {
     command: `npx next start -p ${PORT}`,
-    url: `http://localhost:${PORT}/login`,
+    url: `http://localhost:${PORT}/fr/login`,
     reuseExistingServer: true,
     env,
     timeout: 60_000,

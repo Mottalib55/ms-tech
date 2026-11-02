@@ -1,0 +1,52 @@
+{
+  "title": "Simulateurs",
+  "subtitle": "Testez vos hypothèses : rien n'est enregistré sur vos comptes",
+  "tab": {
+    "compound": "Intérêts composés",
+    "loan": "Prêt immobilier",
+    "patrimony": "Projection du patrimoine"
+  },
+  "settings": "Paramètres",
+  "reset": "Réinitialiser",
+  "maxYears": "Durée limitée à {max} ans.",
+  "year": "Année",
+  "contributions": "Versements",
+  "interest": "Intérêts",
+  "capital": "Capital",
+  "compound": {
+    "totalPaid": "Total versé",
+    "earned": "Intérêts gagnés",
+    "initial": "Capital initial ({currency})",
+    "monthly": "Versement mensuel ({currency})",
+    "rate": "Taux annuel (%)",
+    "years": "Durée (années)",
+    "growth": "Croissance du capital",
+    "final": "Capital final",
+    "label": "intérêts composés",
+    "aria": "Capital final de {amount}"
+  },
+  "loan": {
+    "payment": "Mensualité",
+    "totalCost": "Coût total",
+    "totalInterest": "Total des intérêts",
+    "amount": "Montant emprunté ({currency})",
+    "rate": "Taux annuel (%)",
+    "years": "Durée (années)",
+    "byYear": "Remboursement par année",
+    "perMonth": "{amount}/mois",
+    "empty": "Indiquez un montant et une durée pour voir le remboursement.",
+    "label": "remboursement du prêt",
+    "aria": "Mensualité de {payment}, {interest} d'intérêts au total",
+    "remaining": "Restant dû"
+  },
+  "patrimony": {
+    "start": "Patrimoine de départ ({currency})",
+    "monthly": "Épargne mensuelle ({currency})",
+    "rate": "Rendement annuel (%)",
+    "years": "Horizon (années)",
+    "title": "Projection du patrimoine",
+    "label": "projection du patrimoine",
+    "aria": "Patrimoine projeté de {amount} dans {count} ans",
+    "wealth": "Patrimoine"
+  }
+}

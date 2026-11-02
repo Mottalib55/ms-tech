@@ -1,0 +1,52 @@
+{
+  "title": "Simulators",
+  "subtitle": "Test your assumptions: nothing is saved to your accounts",
+  "tab": {
+    "compound": "Compound interest",
+    "loan": "Mortgage",
+    "patrimony": "Wealth projection"
+  },
+  "settings": "Settings",
+  "reset": "Reset",
+  "maxYears": "Duration limited to {max} years.",
+  "year": "Year",
+  "contributions": "Contributions",
+  "interest": "Interest",
+  "capital": "Capital",
+  "compound": {
+    "totalPaid": "Total paid in",
+    "earned": "Interest earned",
+    "initial": "Starting capital ({currency})",
+    "monthly": "Monthly contribution ({currency})",
+    "rate": "Annual rate (%)",
+    "years": "Duration (years)",
+    "growth": "Capital growth",
+    "final": "Final capital",
+    "label": "compound interest",
+    "aria": "Final capital of {amount}"
+  },
+  "loan": {
+    "payment": "Monthly payment",
+    "totalCost": "Total cost",
+    "totalInterest": "Total interest",
+    "amount": "Amount borrowed ({currency})",
+    "rate": "Annual rate (%)",
+    "years": "Duration (years)",
+    "byYear": "Repayment by year",
+    "perMonth": "{amount}/mo",
+    "empty": "Enter an amount and a duration to see the repayment.",
+    "label": "loan repayment",
+    "aria": "Monthly payment of {payment}, {interest} of interest in total",
+    "remaining": "Outstanding balance"
+  },
+  "patrimony": {
+    "start": "Starting wealth ({currency})",
+    "monthly": "Monthly savings ({currency})",
+    "rate": "Annual return (%)",
+    "years": "Horizon (years)",
+    "title": "Wealth projection",
+    "label": "wealth projection",
+    "aria": "Projected wealth of {amount} in {count} years",
+    "wealth": "Wealth"
+  }
+}

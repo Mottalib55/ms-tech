@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface ModalProps {
@@ -15,6 +16,7 @@ interface ModalProps {
 
 /** A centred dialog on desktop, a bottom sheet on a phone. Escape and the backdrop close it. */
 export default function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
+  const t = useTranslations('common');
   const titleId = useId();
   const panel = useRef<HTMLDivElement>(null);
 
@@ -47,22 +49,22 @@ export default function Modal({ isOpen, onClose, title, children, className }: M
   // Portalled to <body>: a card's stacking context must never paint over the dialog.
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4">
-      <div data-testid="modal-backdrop" className="absolute inset-0 bg-black/70 animate-[backdropFade_150ms_ease-out]" onClick={onClose} />
+      <div data-testid="modal-backdrop" className="absolute inset-0 bg-black/50 animate-[backdropFade_120ms_ease-out]" onClick={onClose} />
       <div
         ref={panel}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          'relative bg-[#141416] border border-[rgba(255,255,255,0.08)] rounded-t-[24px] sm:rounded-[20px] p-5 sm:p-6 w-full sm:max-w-md',
+          'relative bg-raised border border-line rounded-t-[18px] sm:rounded-[16px] p-5 sm:p-6 w-full sm:max-w-md',
           'max-h-[90dvh] overflow-y-auto pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6',
-          'shadow-[0_24px_80px_rgba(0,0,0,0.5)] animate-[sheetEnter_260ms_cubic-bezier(0.22,1,0.36,1)]',
+          'animate-[sheetEnter_160ms_ease-out]',
           className,
         )}
       >
         <div className="flex items-center justify-between mb-4 gap-3">
-          <h2 id={titleId} className="text-lg font-semibold text-[#f5f5f5]">{title}</h2>
-          <button onClick={onClose} aria-label="Fermer" className="w-11 h-11 -mr-2 flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] rounded-[12px] text-[#a0a0a6] hover:text-[#f5f5f5] transition-colors">
+          <h2 id={titleId} className="text-lg font-semibold text-ink">{title}</h2>
+          <button onClick={onClose} aria-label={t('close')} className="w-11 h-11 -me-2 flex items-center justify-center hover:bg-hover rounded-[12px] text-muted hover:text-ink transition-colors">
             <X size={20} />
           </button>
         </div>

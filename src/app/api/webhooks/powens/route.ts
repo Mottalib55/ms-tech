@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     if (error) {
       await prisma.providerConnection.update({
         where: { id: connection.id },
-        data: { status: 'error', lastSyncError: payload.connection?.error_message || 'Reconnectez le compte.' },
+        data: { status: 'error', lastSyncError: payload.connection?.error_message || 'errors.connector.reconnect' },
       });
       return NextResponse.json({ received: true });
     }

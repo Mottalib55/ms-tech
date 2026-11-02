@@ -1,14 +1,14 @@
 // Pure calculations, shared by the server and the unit tests.
 export const ASSET_CLASSES: Record<string, { name: string; color: string }> = {
-  stocks: { name: 'Actions', color: '#bd8a45' },
-  etf: { name: 'ETF', color: '#5b86f0' },
-  crypto: { name: 'Crypto', color: '#d95f20' },
-  'real-estate': { name: 'Immobilier', color: '#149b72' },
-  bonds: { name: 'Obligations', color: '#8f68e8' },
-  cash: { name: 'Liquidités', color: '#1692ad' },
-  commodities: { name: 'Matières premières', color: '#d9508f' },
-  insurance: { name: 'Assurance-vie', color: '#8f8f2e' },
-  other: { name: 'Autres', color: '#7f7f88' },
+  stocks: { name: 'Actions', color: 'var(--c1)' },
+  etf: { name: 'ETF', color: 'var(--c2)' },
+  crypto: { name: 'Crypto', color: 'var(--c5)' },
+  'real-estate': { name: 'Immobilier', color: 'var(--c3)' },
+  bonds: { name: 'Obligations', color: 'var(--c4)' },
+  cash: { name: 'Liquidités', color: 'var(--c6)' },
+  commodities: { name: 'Matières premières', color: 'var(--c7)' },
+  insurance: { name: 'Assurance-vie', color: 'var(--c8)' },
+  other: { name: 'Autres', color: 'var(--c9)' },
 };
 
 export const ACCOUNT_TYPES: Record<string, { name: string; assetClass: string; debt?: boolean }> = {
@@ -30,7 +30,7 @@ export function toAllocation(totals: Record<string, number>): AllocationSlice[] 
     .map(([key, value]) => ({
       key,
       name: ASSET_CLASSES[key]?.name ?? key,
-      color: ASSET_CLASSES[key]?.color ?? '#94a3b8',
+      color: ASSET_CLASSES[key]?.color ?? 'var(--c9)',
       value: Math.round(value * 100) / 100,
       percent: sum > 0 ? Math.round((value / sum) * 1000) / 10 : 0,
     }))

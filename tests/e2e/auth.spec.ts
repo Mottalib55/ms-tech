@@ -3,12 +3,12 @@ import { PASSWORD, register, uniqueEmail, watchErrors } from './helpers';
 
 test('un visiteur non connecté est renvoyé vers la connexion', async ({ page }) => {
   await page.goto('/dashboard/portfolio');
-  await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fdashboard%2Fportfolio/);
+  await expect(page).toHaveURL(/\/login\?callbackUrl=%2Ffr%2Fdashboard%2Fportfolio/);
 });
 
 test('le formulaire de connexion est vide au départ', async ({ page }) => {
   await page.goto('/login');
-  await expect(page.getByLabel('Email')).toHaveValue('');
+  await expect(page.getByLabel(/^e-?mail/i)).toHaveValue('');
   await expect(page.getByLabel('Mot de passe', { exact: false }).first()).toHaveValue('');
 });
 
@@ -19,12 +19,12 @@ test('inscription, déconnexion, mauvais mot de passe, reconnexion et retour à 
     await page.getByRole('button', { name: 'Plus' }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Déconnexion' }).click();
   } else {
-    await page.getByRole('button', { name: 'Se déconnecter' }).click();
+    await page.getByRole('button', { name: 'Déconnexion' }).click();
   }
   await page.waitForURL('**/login**');
 
   await page.goto('/dashboard/budget');
-  await page.getByLabel('Email').fill(email);
+  await page.getByLabel(/^e-?mail/i).fill(email);
   await page.getByLabel('Mot de passe', { exact: false }).first().fill('faux-mot-de-passe');
   await page.getByRole('button', { name: /se connecter/i }).click();
   await expect(page.getByRole('alert').filter({ hasText: /incorrect/i })).toBeVisible();
@@ -47,11 +47,11 @@ test('email déjà pris et mot de passe trop court sont expliqués', async ({ pa
   await context.clearCookies();
   await page.goto('/register');
   await page.getByLabel('Nom').fill('Autre');
-  await page.getByLabel('Email').fill(email);
+  await page.getByLabel(/^e-?mail/i).fill(email);
   await page.getByLabel('Mot de passe', { exact: false }).first().fill(PASSWORD);
   await page.getByRole('button', { name: /créer mon compte/i }).click();
   await expect(page.getByRole('alert').filter({ hasText: /existe déjà/i })).toBeVisible();
-  await page.getByLabel('Email').fill(uniqueEmail());
+  await page.getByLabel(/^e-?mail/i).fill(uniqueEmail());
   await page.getByLabel('Mot de passe', { exact: false }).first().fill('court');
   await page.getByRole('button', { name: /créer mon compte/i }).click();
   await expect(page.getByRole('alert').filter({ hasText: /8 caractères/i })).toBeVisible();
@@ -75,7 +75,7 @@ test('mot de passe oublié : le lien change le mot de passe et ne sert qu\'une f
   await page.getByLabel('Confirmez-le').fill('nouveau-mot-de-passe-2');
   await page.getByRole('button', { name: 'Changer le mot de passe' }).click();
   await page.waitForURL('**/login**');
-  await page.getByLabel('Email').fill(email);
+  await page.getByLabel(/^e-?mail/i).fill(email);
   await page.getByLabel('Mot de passe', { exact: false }).first().fill('nouveau-mot-de-passe-2');
   await page.getByRole('button', { name: /se connecter/i }).click();
   await expect(page).toHaveURL(/\/dashboard$/, { timeout: 15_000 });

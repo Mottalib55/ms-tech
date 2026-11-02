@@ -1,0 +1,41 @@
+{
+  "title": "Projections",
+  "subtitle": "{count} scénarios de marché simulés à partir de vos hypothèses",
+  "field": {
+    "currentAge": "Âge actuel",
+    "retirementAge": "Âge cible",
+    "currentCapital": "Capital actuel ({currency})",
+    "monthlyContribution": "Épargne mensuelle ({currency})",
+    "expectedReturn": "Rendement annuel espéré (%)",
+    "volatility": "Volatilité annuelle (%)",
+    "inflation": "Inflation (%)",
+    "targetAmount": "Objectif ({currency})"
+  },
+  "reachedAt": "Objectif atteint à",
+  "age": "{age} ans",
+  "ageTick": "{age} ans",
+  "atAge": "À {age} ans",
+  "notReached": "Non atteint",
+  "medianScenario": "Dans le scénario médian",
+  "notBefore": "Pas avant {age} ans dans le scénario médian",
+  "medianAt": "Capital médian à {age} ans",
+  "range": "Fourchette probable",
+  "rangeHint": "8 scénarios sur 10 tombent dans cet intervalle",
+  "assumptions": "Vos hypothèses",
+  "reset": "Réinitialiser",
+  "evolution": "Évolution projetée",
+  "invalidAge": "L'âge cible doit être supérieur à votre âge actuel.",
+  "chartLabel": "évolution projetée",
+  "aria": "Capital médian de {amount} à {age} ans",
+  "median": "Scénario médian",
+  "goal": "Objectif",
+  "rangeLegend": "Fourchette probable (8 scénarios sur 10)",
+  "col": {
+    "age": "Âge",
+    "low": "Bas",
+    "median": "Médian",
+    "high": "Haut"
+  },
+  "disclaimer": "Projection statistique, et non un conseil en investissement ni une garantie de résultat. Montants en {unit} constants, c'est-à-dire corrigés de l'inflation.",
+  "euros": "euros"
+}

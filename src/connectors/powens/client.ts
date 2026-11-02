@@ -1,4 +1,5 @@
 import { BaseConnector } from '../base';
+import { connectorError, isHttpStatus } from '../errors';
 import { withQuery } from '../signing';
 import type { CallbackResult, ConnectionInitResult, ProviderSlug, SyncCredentials, SyncResult } from '../types';
 import { normalizePowensData } from './normalizer';
@@ -58,8 +59,8 @@ export interface PowensRawData {
  */
 class PowensConnector extends BaseConnector {
   readonly slug: ProviderSlug = 'powens';
-  readonly displayName = 'Powens (banques, PEA, assurance-vie)';
-  readonly region = 'France / Europe';
+  readonly displayName = 'Powens';
+  readonly region = 'europe';
 
   private get domain() {
     // Accepts "example" or "example.biapi.pro".
@@ -88,7 +89,7 @@ class PowensConnector extends BaseConnector {
   }
 
   async handleCallback(params: Record<string, string>): Promise<CallbackResult> {
-    if (!params.code) throw new Error('Powens n\'a pas renvoyé de code d\'autorisation.');
+    if (!params.code) throw connectorError('noAuthCode', { provider: this.displayName });
     const token = await this.fetchJson<{ access_token: string }>(`${this.baseUrl}/auth/token/access`, {
       method: 'POST',
       body: JSON.stringify({
@@ -120,7 +121,7 @@ class PowensConnector extends BaseConnector {
     try {
       return await this.fetchJson<T>(url, { headers });
     } catch (error) {
-      if (error instanceof Error && /\((403|404)\)/.test(error.message)) return empty;
+      if (isHttpStatus(error, 403, 404)) return empty;
       throw error;
     }
   }

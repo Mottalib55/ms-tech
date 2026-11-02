@@ -1,0 +1,195 @@
+{
+  "back": "Back",
+  "lastUpdate": "Last updated: {date}",
+  "contactFallback": "from your account settings (export and deletion are self-service there)",
+  "privacy": {
+    "title": "Privacy Policy",
+    "blocks": [
+      {
+        "h": "Data controller"
+      },
+      {
+        "p": "{name}. Contact: <contact></contact>."
+      },
+      {
+        "h": "Data processed"
+      },
+      {
+        "li": [
+          "<b>Account</b>: name, email address, hashed password (bcrypt), chosen currency.",
+          "<b>Financial data</b>: accounts, balances, positions, transactions, fees, dividends, budgets and the history of your net worth, entered by you or received from your connections.",
+          "<b>Provider access</b>: API tokens and keys, encrypted at rest (AES-256-GCM). Your bank credentials are never passed to us.",
+          "<b>Technical</b>: the cookies strictly needed to sign in and remember your language, and server error logs."
+        ]
+      },
+      {
+        "p": "No advertising, no audience measurement tool, no Google service. Your data is neither sold nor used for any purpose other than providing you with the service."
+      },
+      {
+        "h": "Purposes and legal bases"
+      },
+      {
+        "li": [
+          "Providing the service you ask for: performance of the contract (Terms).",
+          "Accessing your accounts with a provider: your consent, which you can withdraw at any time by disconnecting it.",
+          "Securing the service (attempt limits, logs): legitimate interest."
+        ]
+      },
+      {
+        "h": "Recipients"
+      },
+      {
+        "li": [
+          "<b>Vercel</b>: hosting of the application.",
+          "<b>Powens, Salt Edge, Lean Technologies</b>: bank aggregation, if you link a bank.",
+          "<b>Binance, Interactive Brokers</b>: reading your balances and positions, if you connect them.",
+          "<b>CoinGecko</b>: cryptocurrency prices; receives only asset names, no personal data.",
+          "<b>Frankfurter (ECB rates)</b>: exchange rates; receives no personal data.",
+          "<b>Resend</b>: sending sign-in code and password reset emails (your address)."
+        ]
+      },
+      {
+        "p": "Some providers may process data outside the European Union, under the safeguards set out by the GDPR (standard contractual clauses or adequacy decision)."
+      },
+      {
+        "h": "Bank aggregation"
+      },
+      {
+        "p": "Bank aggregation goes through providers licensed for the account information service. Access is read-only: MS Tech cannot move money or place orders."
+      },
+      {
+        "h": "Retention period"
+      },
+      {
+        "p": "Your data is kept until you delete your account, which erases it immediately, connections included. Demo accounts are erased within 24 hours."
+      },
+      {
+        "h": "Your rights"
+      },
+      {
+        "p": "You have the rights of access, rectification, erasure, restriction, objection and portability. In Settings, you can at any time edit your profile, <b>export your data</b> and <b>delete your account</b>. For any other request: <contact></contact>. You can also contact the CNIL, the French data protection authority (cnil.fr)."
+      },
+      {
+        "h": "Security"
+      },
+      {
+        "p": "Encrypted connections (HTTPS), hashed passwords, tokens encrypted at rest, limits on sign-in attempts, sign-out of other devices when the password changes."
+      }
+    ]
+  },
+  "terms": {
+    "title": "Terms of Use",
+    "blocks": [
+      {
+        "h": "1. Purpose"
+      },
+      {
+        "p": "These terms govern the use of MS Tech, published by {name}. Creating an account constitutes acceptance."
+      },
+      {
+        "h": "2. Service"
+      },
+      {
+        "p": "MS Tech lets you bring together your accounts, entered by hand or linked to third-party providers, and view net worth, allocation, fees, dividends, budget, projections and simulations."
+      },
+      {
+        "h": "3. No investment advice"
+      },
+      {
+        "p": "MS Tech is an information service. No content constitutes investment advice, a personalised recommendation, or tax or legal advice. Projections and simulations rest on assumptions you choose and do not predict any result. Investing carries a risk of capital loss; your decisions are your own."
+      },
+      {
+        "h": "4. Accuracy of data"
+      },
+      {
+        "p": "Amounts come from what you enter and from third-party providers. They may be incomplete or delayed, particularly if a provider has an outage. Currency conversions use indicative rates. Only your institutions' statements are authoritative."
+      },
+      {
+        "h": "5. Your account"
+      },
+      {
+        "p": "You are responsible for keeping your password and the API keys you entrust to the service confidential. For a key-based platform (Binance), create a read-only key, with no withdrawal or trading rights."
+      },
+      {
+        "h": "6. Connections"
+      },
+      {
+        "p": "You authorise read access to your data with each provider you connect. You can withdraw this access at any time from the Connections page: the accounts concerned then leave your wealth."
+      },
+      {
+        "h": "7. Availability"
+      },
+      {
+        "p": "We strive to keep the service accessible, without guaranteeing that it will be uninterrupted. The service may change."
+      },
+      {
+        "h": "8. Liability"
+      },
+      {
+        "p": "To the extent permitted by law, {name} is not liable for decisions made on the basis of the information displayed, nor for outages of third-party providers. Nothing here limits your consumer rights."
+      },
+      {
+        "h": "9. Termination"
+      },
+      {
+        "p": "You can delete your account at any time in Settings. Deletion is immediate and erases your data. We may suspend an account in the event of fraudulent or abusive use."
+      },
+      {
+        "h": "10. Governing law"
+      },
+      {
+        "p": "These terms are governed by French law. In the event of a dispute, you may use consumer mediation or go to the competent courts."
+      },
+      {
+        "h": "Contact"
+      },
+      {
+        "p": "<contact></contact>."
+      }
+    ]
+  },
+  "mentions": {
+    "title": "Legal notice",
+    "rows": {
+      "row": "{label}: {value}",
+      "legalForm": "Legal form",
+      "capital": "Share capital",
+      "registration": "Registration",
+      "vat": "EU VAT number",
+      "address": "Address",
+      "director": "Publication director"
+    },
+    "blocks": [
+      {
+        "h": "Publisher"
+      },
+      {
+        "slot": "company"
+      },
+      {
+        "p": "Contact: <contact></contact>."
+      },
+      {
+        "h": "Hosting"
+      },
+      {
+        "p": "Application hosted by Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, United States."
+      },
+      {
+        "h": "Nature of the service"
+      },
+      {
+        "p": "MS Tech is an information service that presents an overview of the user's financial data. It is neither investment advice, nor a personalised recommendation, nor a payment service."
+      },
+      {
+        "p": "Bank aggregation goes through providers licensed for the account information service. MS Tech never has access to your bank credentials, which are entered on the pages of these providers or of your bank."
+      },
+      {
+        "h": "Intellectual property"
+      },
+      {
+        "p": "The elements of the application (text, interface, brand) are protected. Any reproduction without permission is prohibited."
+      }
+    ]
+  }
+}

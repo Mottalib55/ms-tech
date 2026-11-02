@@ -3,6 +3,7 @@ import { ApiError, ownedAccount, parseBody, requireUser, route } from '@/server/
 import { recordSnapshot } from '@/server/summary';
 import { accountPatchSchema } from '@/server/validations';
 import { colorForType } from '@/server/colors';
+import { translate } from '@/server/i18n';
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -18,7 +19,12 @@ export const GET = route(async (_req: Request, { params }: Ctx) => {
       connection: { select: { id: true, provider: true, status: true, lastSyncError: true } },
     },
   });
-  return { ...account, manual: !account?.connectionId };
+  const lastSyncError = account?.connection?.lastSyncError;
+  return {
+    ...account,
+    manual: !account?.connectionId,
+    connection: account?.connection && { ...account.connection, lastSyncError: lastSyncError && await translate(lastSyncError) },
+  };
 });
 
 export const PATCH = route(async (req: Request, { params }: Ctx) => {
@@ -29,7 +35,7 @@ export const PATCH = route(async (req: Request, { params }: Ctx) => {
   // A synced account's figures belong to the provider; only its name is ours.
   const allowed = account.connectionId ? { name: data.name } : data;
   if (account.connectionId && (data.balance !== undefined || data.type !== undefined || data.currency !== undefined)) {
-    throw new ApiError(400, 'Le solde de ce compte vient de sa connexion. Vous pouvez seulement le renommer.');
+    throw new ApiError(400, 'errors.accounts.balanceSynced');
   }
   const type = allowed.type ?? account.type;
   const updated = await prisma.financialAccount.update({
@@ -49,7 +55,7 @@ export const DELETE = route(async (_req: Request, { params }: Ctx) => {
   const { id } = await params;
   const account = await ownedAccount(user.id, id);
   if (account.connectionId) {
-    throw new ApiError(400, 'Ce compte vient d\'une connexion : déconnectez-la depuis Connexions.');
+    throw new ApiError(400, 'errors.accounts.accountSynced');
   }
   await prisma.financialAccount.delete({ where: { id } });
   await recordSnapshot(user.id);

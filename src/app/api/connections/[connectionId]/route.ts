@@ -9,7 +9,7 @@ export const DELETE = route(async (_req: Request, { params }: Ctx) => {
   const { connectionId } = await params;
   // Cascades to the accounts it brought: a disconnected bank must leave the net worth.
   const { count } = await prisma.providerConnection.deleteMany({ where: { id: connectionId, userId: user.id } });
-  if (!count) throw notFound('Connexion');
+  if (!count) throw notFound('connection');
   await recordSnapshot(user.id);
   return { success: true };
 });

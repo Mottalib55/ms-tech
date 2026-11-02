@@ -58,7 +58,7 @@ export function normalizePowensData(raw: PowensRawData): SyncResult {
     return {
       externalId: String(a.id),
       name: a.name || a.original_name || `Compte ${a.id}`,
-      institution: a.company_name || 'Banque',
+      institution: a.company_name || 'Bank',
       type,
       // Debts are held positive everywhere in the app, whatever sign the bank uses.
       balance: type === 'loan' ? Math.abs(a.balance ?? a.loan?.total_amount ?? 0) : a.balance ?? 0,
@@ -81,8 +81,8 @@ export function normalizePowensData(raw: PowensRawData): SyncResult {
       // unitvalue is in the account's currency; original_* hold the foreign one.
       currency: currencyOf.get(inv.id_account) ?? 'EUR',
       assetClass: guessAssetClass(inv.label, inv.details?.asset_category, inv.code_type),
-      sector: 'Autre',
-      region: 'Monde',
+      sector: 'other',
+      region: 'world',
       // VERIFY: prev_diff_percent is "since the previous sync" and may be a ratio (0.01 = 1 %); confirm on real data.
       dailyChange: inv.prev_diff_percent ?? 0,
     }));

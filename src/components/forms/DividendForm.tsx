@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { FormError, Select } from '@/components/ui/kit';
@@ -11,6 +12,8 @@ import type { Holding } from '@/types';
 import { CURRENCIES } from './AccountForm';
 
 export default function DividendForm({ holdings, onDone }: { holdings: Holding[]; onDone: () => void }) {
+  const t = useTranslations('dividends.form');
+  const ts = useTranslations('dividends.status');
   const today = new Date().toISOString().slice(0, 10);
   const [holdingId, setHoldingId] = useState(holdings[0]?.id ?? '');
   const [amount, setAmount] = useState('');
@@ -22,7 +25,7 @@ export default function DividendForm({ holdings, onDone }: { holdings: Holding[]
   const [error, setError] = useState<string | null>(null);
 
   const save = useAction((body: object) => api('/api/dividends', { method: 'POST', body }), {
-    success: 'Dividende ajouté', onSuccess: onDone, onError: (e) => setError(e.message),
+    success: t('added'), onSuccess: onDone, onError: (e) => setError(e.message),
   });
 
   const pick = (id: string) => {
@@ -35,32 +38,32 @@ export default function DividendForm({ holdings, onDone }: { holdings: Holding[]
     e.preventDefault();
     setError(null);
     const value = parseAmount(amount);
-    if (Number.isNaN(value) || value <= 0) return setError('Indiquez le montant du dividende.');
-    if (exDate > payDate) return setError('La date de détachement doit précéder la date de paiement.');
+    if (Number.isNaN(value) || value <= 0) return setError(t('needAmount'));
+    if (exDate > payDate) return setError(t('dates'));
     save.mutate({ holdingId, amount: value, currency, exDate, payDate, status, frequency });
   };
 
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
       <FormError message={error} />
-      <Select label="Position" value={holdingId} onChange={(e) => pick(e.target.value)}>
+      <Select label={t('position')} value={holdingId} onChange={(e) => pick(e.target.value)}>
         {holdings.map((h) => <option key={h.id} value={h.id}>{h.symbol} · {h.name}</option>)}
       </Select>
       <div className="grid grid-cols-3 gap-3">
-        <div className="col-span-2"><Input id="dividend-amount" label="Montant total" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} autoComplete="off" /></div>
-        <Select label="Devise" value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCIES.map((c) => <option key={c}>{c}</option>)}</Select>
+        <div className="col-span-2"><Input id="dividend-amount" label={t('amount')} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} autoComplete="off" /></div>
+        <Select label={t('currency')} value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCIES.map((c) => <option key={c}>{c}</option>)}</Select>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Input id="dividend-ex" label="Détachement" type="date" value={exDate} onChange={(e) => setExDate(e.target.value)} />
-        <Input id="dividend-pay" label="Paiement" type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
-        <Select label="Statut" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="paid">Versé</option><option value="confirmed">Confirmé</option><option value="projected">Prévu</option>
+        <Input id="dividend-ex" label={t('ex')} dir="ltr" type="date" value={exDate} onChange={(e) => setExDate(e.target.value)} />
+        <Input id="dividend-pay" label={t('pay')} dir="ltr" type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
+        <Select label={t('status')} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="paid">{ts('paid')}</option><option value="confirmed">{ts('confirmed')}</option><option value="projected">{ts('projected')}</option>
         </Select>
-        <Select label="Fréquence" value={frequency} onChange={(e) => setFrequency(e.target.value)}>
-          <option value="monthly">Mensuelle</option><option value="quarterly">Trimestrielle</option><option value="semi-annual">Semestrielle</option><option value="annual">Annuelle</option>
+        <Select label={t('frequency')} value={frequency} onChange={(e) => setFrequency(e.target.value)}>
+          <option value="monthly">{t('freq.monthly')}</option><option value="quarterly">{t('freq.quarterly')}</option><option value="semi-annual">{t('freq.semi-annual')}</option><option value="annual">{t('freq.annual')}</option>
         </Select>
       </div>
-      <Button type="submit" loading={save.isPending} className="w-full">Ajouter le dividende</Button>
+      <Button type="submit" loading={save.isPending} className="w-full">{t('submit')}</Button>
     </form>
   );
 }

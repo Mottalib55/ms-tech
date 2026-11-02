@@ -1,4 +1,5 @@
 import { BaseConnector } from '../base';
+import { connectorError } from '../errors';
 import { round2 } from '../signing';
 import type { CallbackResult, ConnectionInitResult, NormalizedAccount, NormalizedHolding, ProviderSlug, SyncCredentials, SyncResult } from '../types';
 
@@ -71,8 +72,8 @@ export function parseFlexStatement(xml: string): Pick<SyncResult, 'accounts' | '
         currentPrice,
         currency: p.currency || baseCurrency,
         assetClass: ASSET_CLASSES[p.assetCategory] ?? 'other',
-        sector: 'Autre',
-        region: 'Monde',
+        sector: 'other',
+        region: 'world',
         dailyChange: 0,
       });
     }
@@ -94,7 +95,7 @@ export function parseFlexStatement(xml: string): Pick<SyncResult, 'accounts' | '
 class IBKRConnector extends BaseConnector {
   readonly slug: ProviderSlug = 'ibkr';
   readonly displayName = 'Interactive Brokers';
-  readonly region = 'Monde';
+  readonly region = 'world';
 
   isConfigured() {
     return process.env.IBKR_FLEX_ENABLED === '1';
@@ -105,7 +106,7 @@ class IBKRConnector extends BaseConnector {
   }
 
   async handleCallback(): Promise<CallbackResult> {
-    throw new Error('Interactive Brokers se connecte par jeton Flex, sans redirection.');
+    throw connectorError('noRedirect', { provider: this.displayName });
   }
 
   private async flex(path: string, params: Record<string, string>): Promise<string> {
@@ -113,16 +114,16 @@ class IBKRConnector extends BaseConnector {
       headers: { 'User-Agent': USER_AGENT },
       signal: AbortSignal.timeout(30_000),
     });
-    if (!res.ok) throw new Error(`${this.displayName} a répondu avec une erreur (${res.status}).`);
+    if (!res.ok) throw connectorError('http', { provider: this.displayName, status: res.status });
     return res.text();
   }
 
   async sync({ accessToken: token, apiSecret: queryId }: SyncCredentials): Promise<SyncResult> {
-    if (!token || !queryId) throw new Error('Jeton Flex et identifiant de requête requis.');
+    if (!token || !queryId) throw connectorError('ibkrKeysRequired');
     const sent = await this.flex('SendRequest', { t: token, q: queryId });
     const reference = tagValue(sent, 'ReferenceCode');
     if (tagValue(sent, 'Status') !== 'Success' || !reference) {
-      throw new Error(`Interactive Brokers a refusé la requête Flex (${tagValue(sent, 'ErrorCode') ?? 'inconnu'}).`);
+      throw connectorError('ibkrRefused', { code: tagValue(sent, 'ErrorCode') ?? '?' });
     }
 
     for (let attempt = 0; attempt < 6; attempt++) {
@@ -132,9 +133,9 @@ class IBKRConnector extends BaseConnector {
         return { ...parseFlexStatement(statement), fees: [], dividends: [], transactions: [] };
       }
       const code = tagValue(statement, 'ErrorCode') ?? '';
-      if (!RETRYABLE.has(code)) throw new Error(`Interactive Brokers n'a pas fourni le relevé (${code || 'inconnu'}).`);
+      if (!RETRYABLE.has(code)) throw connectorError('ibkrNoStatement', { code: code || '?' });
     }
-    throw new Error('Interactive Brokers n\'a pas généré le relevé à temps. Réessayez plus tard.');
+    throw connectorError('ibkrTimeout');
   }
 
   async refreshCredentials(refreshToken: string) {

@@ -5,6 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { prisma } from './db';
 import { hit } from './limiter';
+import { consumeLoginCode } from './loginCode';
 
 // Compared when the address is unknown, so timing does not reveal who has an account.
 const DUMMY_HASH = '$2b$12$C6UzMDM.H6dfI/f/IKcEeO7ZPZ6yr3xgYBG5ZQ1oQkI4i2zGmXk7K';
@@ -35,6 +36,23 @@ export const authOptions: NextAuthOptions = {
           tokenVersion: user.tokenVersion,
           isDemo: user.isDemo,
         };
+      },
+    }),
+    CredentialsProvider({
+      id: 'email-code',
+      name: 'email-code',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        code: { label: 'Code', type: 'text' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.code) return null;
+        const email = credentials.email.trim().toLowerCase();
+        if (!(await hit(`code-login:${email}`, 10, 300))) throw new Error('RATE_LIMITED');
+        if (!(await consumeLoginCode(email, credentials.code))) return null;
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user || user.isDemo) return null;
+        return { id: user.id, name: user.name, email: user.email, image: user.image, tokenVersion: user.tokenVersion, isDemo: user.isDemo };
       },
     }),
   ],
