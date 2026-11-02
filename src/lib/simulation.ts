@@ -1,104 +1,80 @@
 import { MonteCarloParams, MonteCarloResult, SimulatorResult, LoanResult } from '@/types';
 
-export function runMonteCarlo(params: MonteCarloParams, numSimulations = 5000): MonteCarloResult[] {
-  const years = params.retirementAge - params.currentAge;
-  const results: number[][] = [];
+const MAX_YEARS = 80;
+const clampYears = (n: number) => Math.max(0, Math.min(MAX_YEARS, Math.floor(Number.isFinite(n) ? n : 0)));
+const safe = (n: number) => (Number.isFinite(n) ? n : 0);
 
-  for (let i = 0; i <= years; i++) {
-    results.push([]);
-  }
-
-  for (let sim = 0; sim < numSimulations; sim++) {
-    let capital = params.currentCapital;
-    for (let year = 0; year <= years; year++) {
-      results[year].push(capital);
-      const annualReturn = randomNormal(params.expectedReturn / 100, params.volatility / 100);
-      const realReturn = annualReturn - params.inflation / 100;
-      capital = capital * (1 + realReturn) + params.monthlyContribution * 12;
-    }
-  }
-
-  return results.map((yearData, i) => {
-    yearData.sort((a, b) => a - b);
-    const len = yearData.length;
-    return {
-      age: params.currentAge + i,
-      pessimistic: yearData[Math.floor(len * 0.05)],
-      p10: yearData[Math.floor(len * 0.1)],
-      median: yearData[Math.floor(len * 0.5)],
-      p90: yearData[Math.floor(len * 0.9)],
-      optimistic: yearData[Math.floor(len * 0.95)],
-    };
-  });
-}
-
-function randomNormal(mean: number, stdDev: number): number {
-  const u1 = Math.random();
-  const u2 = Math.random();
-  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+function randomNormal(mean: number, stdDev: number, rand: () => number): number {
+  const u1 = Math.max(rand(), 1e-12);
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * rand());
   return mean + stdDev * z;
 }
 
-export function simulateCompoundInterest(
-  initialCapital: number,
-  monthlyContribution: number,
-  annualRate: number,
-  years: number
-): SimulatorResult[] {
-  const results: SimulatorResult[] = [];
-  let capital = initialCapital;
-  let totalContributions = initialCapital;
-
-  for (let year = 0; year <= years; year++) {
-    const interest = capital - totalContributions;
-    results.push({
-      year,
-      capital: Math.round(capital),
-      contributions: Math.round(totalContributions),
-      interest: Math.round(interest < 0 ? 0 : interest),
-    });
-    const monthlyRate = annualRate / 100 / 12;
-    for (let month = 0; month < 12; month++) {
-      capital = capital * (1 + monthlyRate) + monthlyContribution;
-      totalContributions += monthlyContribution;
+/** Figures are in today's money (returns net of inflation). Invalid ages give an empty series, not a crash. */
+export function runMonteCarlo(params: MonteCarloParams, numSimulations = 2000, rand: () => number = Math.random): MonteCarloResult[] {
+  const years = clampYears(params.retirementAge - params.currentAge);
+  if (params.retirementAge <= params.currentAge) return [];
+  const results = Array.from({ length: years + 1 }, () => new Float64Array(numSimulations));
+  const mean = safe(params.expectedReturn) / 100;
+  const vol = safe(params.volatility) / 100;
+  const inflation = safe(params.inflation) / 100;
+  const yearly = safe(params.monthlyContribution) * 12;
+  for (let sim = 0; sim < numSimulations; sim++) {
+    let capital = safe(params.currentCapital);
+    for (let year = 0; year <= years; year++) {
+      results[year][sim] = capital;
+      // A year cannot lose more than everything: capital stays at or above zero.
+      capital = Math.max(0, capital * (1 + randomNormal(mean, vol, rand) - inflation) + yearly);
     }
   }
+  return results.map((row, i) => {
+    row.sort();
+    const at = (q: number) => row[Math.min(row.length - 1, Math.floor(row.length * q))];
+    return { age: params.currentAge + i, pessimistic: at(0.05), p10: at(0.1), median: at(0.5), p90: at(0.9), optimistic: at(0.95) };
+  });
+}
 
+export function simulateCompoundInterest(initialCapital: number, monthlyContribution: number, annualRate: number, years: number): SimulatorResult[] {
+  const results: SimulatorResult[] = [];
+  const horizon = clampYears(years);
+  const monthlyRate = safe(annualRate) / 100 / 12;
+  const monthly = safe(monthlyContribution);
+  let capital = safe(initialCapital);
+  let paid = capital;
+  for (let year = 0; year <= horizon; year++) {
+    results.push({ year, capital: Math.round(capital), contributions: Math.round(paid), interest: Math.round(Math.max(0, capital - paid)) });
+    for (let m = 0; m < 12; m++) {
+      capital = capital * (1 + monthlyRate) + monthly;
+      paid += monthly;
+    }
+  }
   return results;
 }
 
-export function simulateLoan(
-  amount: number,
-  annualRate: number,
-  years: number
-): LoanResult {
-  const monthlyRate = annualRate / 100 / 12;
-  const totalMonths = years * 12;
-  const monthlyPayment =
-    (amount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) /
-    (Math.pow(1 + monthlyRate, totalMonths) - 1);
-
+/** Handles the 0 % loan, where the textbook formula divides by zero. */
+export function simulateLoan(amount: number, annualRate: number, years: number): LoanResult {
+  const principal0 = Math.max(0, safe(amount));
+  const totalMonths = clampYears(years) * 12;
+  if (totalMonths === 0 || principal0 === 0) return { monthlyPayment: 0, totalCost: 0, totalInterest: 0, amortization: [] };
+  const r = Math.max(0, safe(annualRate)) / 100 / 12;
+  const monthlyPayment = r === 0 ? principal0 / totalMonths : (principal0 * r) / (1 - Math.pow(1 + r, -totalMonths));
   const amortization: LoanResult['amortization'] = [];
-  let remaining = amount;
-
+  let remaining = principal0;
+  let yearP = 0;
+  let yearI = 0;
   for (let month = 1; month <= totalMonths; month++) {
-    const interest = remaining * monthlyRate;
+    const interest = remaining * r;
     const principal = monthlyPayment - interest;
     remaining -= principal;
-    if (month % 12 === 0 || month === 1 || month === totalMonths) {
-      amortization.push({
-        month,
-        principal: Math.round(principal),
-        interest: Math.round(interest),
-        remaining: Math.max(0, Math.round(remaining)),
-      });
+    yearP += principal;
+    yearI += interest;
+    if (month % 12 === 0) {
+      amortization.push({ month, principal: Math.round(yearP), interest: Math.round(yearI), remaining: Math.max(0, Math.round(remaining)) });
+      yearP = 0;
+      yearI = 0;
     }
   }
-
-  return {
-    monthlyPayment: Math.round(monthlyPayment * 100) / 100,
-    totalCost: Math.round(monthlyPayment * totalMonths * 100) / 100,
-    totalInterest: Math.round((monthlyPayment * totalMonths - amount) * 100) / 100,
-    amortization,
-  };
+  const totalCost = monthlyPayment * totalMonths;
+  const r2 = (n: number) => Math.round(n * 100) / 100;
+  return { monthlyPayment: r2(monthlyPayment), totalCost: r2(totalCost), totalInterest: r2(totalCost - principal0), amortization };
 }

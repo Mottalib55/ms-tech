@@ -1,88 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/server/db';
-import { getConnector } from '@/connectors/registry';
-import { decrypt } from '@/server/encryption';
-import { persistSyncResult } from '@/server/sync';
-import type { ProviderSlug } from '@/connectors/types';
+import { syncConnection } from '@/server/sync';
+import { recordSnapshot } from '@/server/summary';
 
-export async function POST(req: NextRequest) {
-  try {
-    // Verify cron secret
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Find all active connections that haven't synced in the last hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-
-    const staleConnections = await prisma.providerConnection.findMany({
-      where: {
-        status: 'active',
-        accessTokenEnc: { not: null },
-        OR: [
-          { lastSyncAt: null },
-          { lastSyncAt: { lt: oneHourAgo } },
-        ],
-      },
-    });
-
-    const results: { connectionId: string; provider: string; status: string; error?: string }[] = [];
-
-    for (const connection of staleConnections) {
-      try {
-        const connector = getConnector(connection.provider as ProviderSlug);
-        const accessToken = await decrypt(connection.accessTokenEnc!);
-
-        // Check if token needs refresh
-        if (connection.tokenExpiresAt && connection.tokenExpiresAt < new Date()) {
-          if (connection.refreshTokenEnc) {
-            const refreshToken = await decrypt(connection.refreshTokenEnc);
-            const newTokens = await connector.refreshCredentials(refreshToken);
-
-            const { encrypt } = await import('@/server/encryption');
-            await prisma.providerConnection.update({
-              where: { id: connection.id },
-              data: {
-                accessTokenEnc: await encrypt(newTokens.accessToken),
-                refreshTokenEnc: newTokens.refreshToken
-                  ? await encrypt(newTokens.refreshToken)
-                  : connection.refreshTokenEnc,
-                tokenExpiresAt: newTokens.expiresAt ?? null,
-              },
-            });
-          }
-        }
-
-        const syncResult = await connector.sync(accessToken);
-        await persistSyncResult(connection.id, connection.userId, syncResult);
-
-        results.push({
-          connectionId: connection.id,
-          provider: connection.provider,
-          status: 'success',
-        });
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        results.push({
-          connectionId: connection.id,
-          provider: connection.provider,
-          status: 'error',
-          error: errorMessage,
-        });
-      }
-    }
-
-    return NextResponse.json({
-      synced: results.filter((r) => r.status === 'success').length,
-      errors: results.filter((r) => r.status === 'error').length,
-      total: staleConnections.length,
-      results,
-    });
-  } catch (error) {
-    console.error('Cron sync error:', error);
-    return NextResponse.json({ error: 'Cron sync failed' }, { status: 500 });
+// Vercel Cron calls GET with `Authorization: Bearer $CRON_SECRET`. The route
+// only answered POST before, so the hourly sync never ran; and with no secret
+// configured it was open to anyone. It now refuses when the secret is missing.
+export async function GET(req: Request) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.headers.get('authorization') !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const hourAgo = new Date(Date.now() - 3600_000);
+  const stale = await prisma.providerConnection.findMany({
+    where: { status: { in: ['active', 'error'] }, accessTokenEnc: { not: null }, OR: [{ lastSyncAt: null }, { lastSyncAt: { lt: hourAgo } }] },
+    select: { id: true },
+    take: 200,
+  });
+  let synced = 0;
+  let errors = 0;
+  for (const { id } of stale) {
+    try {
+      await syncConnection(id);
+      synced += 1;
+    } catch {
+      errors += 1;
+    }
+  }
+
+  // Give everyone one point a day on the curve, even with nothing to sync.
+  const today = new Date().toISOString().slice(0, 10);
+  const users = await prisma.user.findMany({
+    where: { isDemo: false, financialAccounts: { some: {} }, performancePoints: { none: { date: today } } },
+    select: { id: true },
+    take: 500,
+  });
+  for (const u of users) await recordSnapshot(u.id).catch(() => {});
+
+  const purged = await prisma.user.deleteMany({
+    where: { isDemo: true, createdAt: { lt: new Date(Date.now() - 86_400_000) } },
+  });
+  await prisma.providerConnection.deleteMany({
+    where: { status: 'pending', createdAt: { lt: new Date(Date.now() - 3600_000) } },
+  });
+
+  return NextResponse.json({ total: stale.length, synced, errors, snapshots: users.length, demoPurged: purged.count });
 }

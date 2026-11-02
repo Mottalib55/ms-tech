@@ -1,126 +1,94 @@
-import { createHmac } from 'crypto';
+import { createHmac } from 'node:crypto';
 import { BaseConnector } from '../base';
-import { registerConnector } from '../registry';
-import type {
-  ProviderSlug,
-  ConnectionInitResult,
-  CallbackResult,
-  SyncResult,
-  NormalizedAccount,
-  NormalizedHolding,
-} from '../types';
-
-interface BinanceBalance {
-  asset: string;
-  free: string;
-  locked: string;
-}
+import { round2 } from '../signing';
+import type { CallbackResult, ConnectionInitResult, NormalizedHolding, ProviderSlug, SyncCredentials, SyncResult } from '../types';
 
 interface BinanceAccountInfo {
-  balances: BinanceBalance[];
+  balances: { asset: string; free: string; locked: string }[];
 }
 
-interface BinanceTicker {
-  symbol: string;
-  price: string;
-}
+const BASE_URL = 'https://api.binance.com';
+const DOLLARS = new Set(['USDT', 'USDC', 'BUSD', 'FDUSD', 'TUSD', 'DAI', 'USD']);
 
-const BINANCE_BASE_URL = 'https://api.binance.com';
-
+/**
+ * https://developers.binance.com/docs/binance-spot-api-docs/rest-api/account-endpoints
+ * Each user supplies their own read-only key; there is nothing to configure on our side.
+ * api.binance.com refuses some cloud regions (HTTP 451 from the US): deploy accordingly.
+ */
 class BinanceConnector extends BaseConnector {
   readonly slug: ProviderSlug = 'binance';
   readonly displayName = 'Binance';
-  readonly region = 'Global';
+  readonly region = 'Monde';
 
-  private sign(queryString: string, apiSecret: string): string {
-    return createHmac('sha256', apiSecret).update(queryString).digest('hex');
+  isConfigured() {
+    return true;
   }
 
   async initiateConnection(): Promise<ConnectionInitResult> {
     return { type: 'api_key' };
   }
 
-  async handleCallback(params: Record<string, string>): Promise<CallbackResult> {
+  async handleCallback(): Promise<CallbackResult> {
+    throw new Error('Binance se connecte par clé API, sans redirection.');
+  }
+
+  async sync({ accessToken: apiKey, apiSecret }: SyncCredentials): Promise<SyncResult> {
+    if (!apiKey || !apiSecret) throw new Error('Clé et secret API Binance requis.');
+
+    const query = `omitZeroBalances=true&recvWindow=10000&timestamp=${Date.now()}`;
+    const signature = createHmac('sha256', apiSecret).update(query).digest('hex');
+    const info = await this.fetchJson<BinanceAccountInfo>(`${BASE_URL}/api/v3/account?${query}&signature=${signature}`, {
+      headers: { 'X-MBX-APIKEY': apiKey },
+    });
+    const tickers = await this.fetchJson<{ symbol: string; price: string }[]>(`${BASE_URL}/api/v3/ticker/price`);
+    const prices = new Map(tickers.map((t) => [t.symbol, parseFloat(t.price)]));
+
+    const priceOf = (asset: string): number => {
+      if (DOLLARS.has(asset)) return 1;
+      // VERIFY: Simple Earn balances are seen as LD<asset>, with no market of their own; not in the docs.
+      const base = asset.startsWith('LD') && !prices.has(`${asset}USDT`) ? asset.slice(2) : asset;
+      if (DOLLARS.has(base)) return 1;
+      // An asset with no USDT pair is kept with a zero value rather than failing the sync.
+      return prices.get(`${base}USDT`) ?? 0;
+    };
+
+    const holdings: NormalizedHolding[] = [];
+    let total = 0;
+    for (const b of info.balances) {
+      const quantity = parseFloat(b.free) + parseFloat(b.locked);
+      if (!(quantity > 0)) continue;
+      const price = priceOf(b.asset);
+      total += quantity * price;
+      holdings.push({
+        externalId: `binance-${b.asset}`,
+        accountExternalId: 'binance-spot',
+        symbol: b.asset,
+        name: b.asset,
+        quantity,
+        // Binance does not report a cost basis: gain shows as zero rather than invented.
+        avgPrice: price,
+        currentPrice: price,
+        currency: 'USD',
+        assetClass: DOLLARS.has(b.asset) ? 'cash' : 'crypto',
+        sector: 'Crypto',
+        region: 'Monde',
+        dailyChange: 0,
+      });
+    }
+
     return {
-      externalId: 'binance',
-      accessToken: params.apiKey || '',
-      metadata: { apiSecret: params.apiSecret || '' },
+      accounts: [{
+        externalId: 'binance-spot', name: 'Binance Spot', institution: 'Binance', type: 'crypto',
+        balance: round2(total), currency: 'USD', color: '#f97316',
+      }],
+      holdings, fees: [], dividends: [], transactions: [],
     };
   }
 
-  async sync(apiKey: string, apiSecret?: string): Promise<SyncResult> {
-    if (!apiKey || !apiSecret) {
-      throw new Error('Binance API key and secret are required');
-    }
-
-    const timestamp = Date.now();
-    const queryString = `timestamp=${timestamp}`;
-    const signature = this.sign(queryString, apiSecret);
-
-    const accountInfo = await this.fetchJson<BinanceAccountInfo>(
-      `${BINANCE_BASE_URL}/api/v3/account?${queryString}&signature=${signature}`,
-      { headers: { 'X-MBX-APIKEY': apiKey } }
-    );
-
-    // Get current prices
-    const tickers = await this.fetchJson<BinanceTicker[]>(
-      `${BINANCE_BASE_URL}/api/v3/ticker/price`
-    );
-    const priceMap = new Map<string, number>();
-    for (const t of tickers) {
-      priceMap.set(t.symbol, parseFloat(t.price));
-    }
-
-    const significantBalances = accountInfo.balances.filter((b) => {
-      const total = parseFloat(b.free) + parseFloat(b.locked);
-      return total > 0;
-    });
-
-    const totalUSDT = significantBalances.reduce((sum, b) => {
-      const qty = parseFloat(b.free) + parseFloat(b.locked);
-      if (b.asset === 'USDT' || b.asset === 'BUSD') return sum + qty;
-      const price = priceMap.get(`${b.asset}USDT`) || 0;
-      return sum + qty * price;
-    }, 0);
-
-    const accounts: NormalizedAccount[] = [{
-      externalId: 'binance-spot',
-      name: 'Binance Spot',
-      institution: 'Binance',
-      type: 'crypto',
-      balance: Math.round(totalUSDT * 100) / 100,
-      currency: 'USD',
-      color: '#f97316',
-    }];
-
-    const holdings: NormalizedHolding[] = significantBalances.map((b) => {
-      const qty = parseFloat(b.free) + parseFloat(b.locked);
-      const usdtPrice = b.asset === 'USDT' || b.asset === 'BUSD'
-        ? 1
-        : priceMap.get(`${b.asset}USDT`) || 0;
-      return {
-        externalId: `binance-${b.asset}`,
-        symbol: b.asset,
-        name: b.asset,
-        quantity: qty,
-        avgPrice: usdtPrice,
-        currentPrice: usdtPrice,
-        currency: 'USD',
-        assetClass: 'crypto',
-        sector: 'Crypto',
-        region: 'Global',
-        dailyChange: 0,
-      };
-    });
-
-    return { accounts, holdings, fees: [], dividends: [], transactions: [] };
-  }
-
-  async refreshCredentials(refreshToken: string): Promise<{ accessToken: string }> {
+  async refreshCredentials(refreshToken: string) {
     return { accessToken: refreshToken };
   }
 }
 
 const binance = new BinanceConnector();
-registerConnector('binance', () => binance);
 export default binance;

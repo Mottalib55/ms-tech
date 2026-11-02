@@ -1,185 +1,143 @@
-'use client';
-
 import Link from 'next/link';
-import {
-  TrendingUp,
-  Shield,
-  PieChart,
-  Receipt,
-  Calculator,
-  BarChart3,
-  ArrowRight,
-  ChevronRight,
-} from 'lucide-react';
+import { ArrowRight, Calculator, CalendarDays, Download, Link2, Lock, PieChart, Receipt, ShieldCheck, TrendingUp, Trash2, Wallet2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import AnimatedNumber from '@/components/ui/AnimatedNumber';
+import DemoButton from '@/components/DemoButton';
 import Footer from '@/components/layout/Footer';
+import Logo from '@/components/layout/Logo';
 
-const features = [
-  {
-    icon: PieChart,
-    title: 'Agrégation complète',
-    description: 'Connectez tous vos comptes : PEA, CTO, assurance-vie, crypto, immobilier. Vue 360° de votre patrimoine.',
-  },
-  {
-    icon: Receipt,
-    title: 'Scanner de frais',
-    description: 'Détectez les frais cachés et leur impact sur 20 ans. Économisez des milliers d\'euros.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Simulations Monte Carlo',
-    description: '5000 scénarios pour projeter votre patrimoine et planifier votre indépendance financière.',
-  },
-  {
-    icon: Calculator,
-    title: 'Simulateurs avancés',
-    description: 'Intérêts composés, prêt immobilier, projection patrimoniale. Prenez les bonnes décisions.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Suivi budgétaire',
-    description: 'Catégorisez vos dépenses, suivez votre taux d\'épargne et atteignez vos objectifs.',
-  },
-  {
-    icon: Shield,
-    title: 'Sécurité maximale',
-    description: 'Chiffrement de bout en bout, connexion lecture seule. Vos données restent les vôtres.',
-  },
+const FEATURES = [
+  { icon: Link2, title: 'Tout au même endroit', text: 'Banques, courtiers, assurance-vie, crypto, immobilier et crédits : connectés automatiquement ou saisis à la main.' },
+  { icon: PieChart, title: 'Votre vraie répartition', text: 'Par classe d\'actifs, région et secteur, converti dans votre devise. Dettes déduites.' },
+  { icon: Receipt, title: 'Vos frais, en clair', text: 'Listez ce que vous payez et voyez ce que cela coûte sur vingt ans.' },
+  { icon: CalendarDays, title: 'Dividendes', text: 'Versés, confirmés, à venir : le calendrier de vos revenus passifs.' },
+  { icon: Wallet2, title: 'Budget', text: 'Revenus, dépenses, catégories et taux d\'épargne, mois après mois.' },
+  { icon: TrendingUp, title: 'Projections', text: 'Une fourchette de scénarios pour votre patrimoine, plutôt qu\'un seul chiffre rassurant.' },
+  { icon: Calculator, title: 'Simulateurs', text: 'Intérêts composés, prêt immobilier, projection de patrimoine.' },
+  { icon: ShieldCheck, title: 'Vos données restent à vous', text: 'Clés d\'accès chiffrées AES, connexions en lecture seule, export et suppression en un geste.' },
 ];
 
-const stats = [
-  { value: 2500000000, label: 'Actifs suivis', format: (n: number) => `${(n / 1000000000).toFixed(1)} Mrd €` },
-  { value: 15000, label: 'Utilisateurs', format: (n: number) => `${n.toLocaleString('fr-FR')}+` },
-  { value: 1247, label: 'Économie moy./an', format: (n: number) => `€${n.toLocaleString('fr-FR')}` },
-  { value: 99.9, label: 'Disponibilité', format: (n: number) => `${n.toFixed(1)}%` },
+const FACTS = [
+  { value: '5', label: 'connecteurs : Europe, Émirats, monde, crypto, courtier' },
+  { value: '2 000', label: 'scénarios par projection Monte Carlo' },
+  { value: '9', label: 'devises d\'affichage, dont EUR, USD, CHF et AED' },
+  { value: '1 geste', label: 'pour exporter ou supprimer vos données' },
 ];
+
+/** Decorative: every figure is invented, and labelled as such on screen. */
+function AppPreview() {
+  const slices = [
+    { name: 'Immobilier', pct: 62, color: '#149b72' },
+    { name: 'ETF', pct: 16, color: '#5b86f0' },
+    { name: 'Actions', pct: 12, color: '#bd8a45' },
+    { name: 'Liquidités', pct: 10, color: '#1692ad' },
+  ];
+  return (
+    <figure className="relative mx-auto w-full max-w-[340px]" aria-label="Illustration de l'application avec des chiffres fictifs">
+      <div className="absolute -inset-10 bg-[radial-gradient(ellipse_at_center,rgba(244,190,126,0.14),transparent_70%)] pointer-events-none" />
+      <div aria-hidden className="relative rounded-[32px] border border-white/[0.1] bg-[#0f0f11] p-5 shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
+        <p className="text-xs text-[#a0a0a6]">Patrimoine net</p>
+        <p className="text-3xl font-bold tracking-tight text-[#f5f5f5] tabular-nums mt-1">312 450 €</p>
+        <p className="text-xs font-medium text-[#34d399] mt-1 tabular-nums">+1,84 % sur 30 jours</p>
+        <svg viewBox="0 0 300 90" className="w-full mt-4" role="presentation">
+          <defs><linearGradient id="prev" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f4be7e" stopOpacity="0.28" /><stop offset="100%" stopColor="#f4be7e" stopOpacity="0" /></linearGradient></defs>
+          <path d="M0 78 C30 72 45 74 70 62 S115 58 140 50 S190 52 215 34 S265 22 300 10 V90 H0Z" fill="url(#prev)" />
+          <path d="M0 78 C30 72 45 74 70 62 S115 58 140 50 S190 52 215 34 S265 22 300 10" fill="none" stroke="#f4be7e" strokeWidth="2" />
+        </svg>
+        <div className="flex gap-[2px] h-2.5 mt-4 rounded-full overflow-hidden">
+          {slices.map((s) => <span key={s.name} style={{ width: `${s.pct}%`, backgroundColor: s.color }} />)}
+        </div>
+        <ul className="mt-3 space-y-1.5">
+          {slices.map((s) => (
+            <li key={s.name} className="flex justify-between text-xs">
+              <span className="flex items-center gap-2 text-[#a0a0a6]"><span className="w-2 h-2 rounded-[2px]" style={{ backgroundColor: s.color }} />{s.name}</span>
+              <span className="text-[#f5f5f5] tabular-nums">{s.pct} %</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <figcaption className="relative text-center text-xs text-[#8e8e98] mt-3">Illustration, chiffres fictifs</figcaption>
+    </figure>
+  );
+}
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen">
-      {/* Navbar */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-5xl z-50">
-        <div className="h-14 bg-[rgba(20,20,22,0.7)] border border-[rgba(255,255,255,0.06)] backdrop-blur-[20px] backdrop-saturate-[160%] rounded-[16px] flex items-center justify-between px-5 shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center bg-gradient-to-br from-[#d4a06a] via-[#f4be7e] to-[#f9d09f] shadow-[0_0_16px_rgba(244,190,126,0.3)]">
-              <span className="text-[#0a0a0b] font-bold text-sm">MS</span>
-            </div>
-            <span className="text-lg font-bold text-[#f5f5f5]">MS Tech</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" size="sm">Connexion</Button>
-            </Link>
-            <Link href="/register">
-              <Button size="sm">Commencer</Button>
-            </Link>
-          </div>
+    <div className="min-h-dvh overflow-x-hidden">
+      <header className="sticky top-0 z-40 bg-[#0a0a0b]/85 backdrop-blur-xl border-b border-white/[0.05] pt-[env(safe-area-inset-top)]">
+        <div className="max-w-6xl mx-auto h-16 px-4 sm:px-6 flex items-center justify-between gap-3">
+          <Link href="/" aria-label="MS Tech, accueil"><Logo size="sm" /></Link>
+          <nav aria-label="Compte" className="flex items-center gap-1 sm:gap-2">
+            <Link href="/login"><Button variant="ghost" size="sm">Connexion</Button></Link>
+            <Link href="/register"><Button size="sm">Commencer</Button></Link>
+          </nav>
         </div>
-      </nav>
+      </header>
 
-      {/* Hero */}
-      <section className="pt-36 pb-20 px-4 sm:px-6 lg:px-8 relative">
-        {/* Radial mesh glow */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(86,130,242,0.12)_0%,rgba(244,190,126,0.06)_40%,transparent_70%)]" />
-        </div>
-        <div className="max-w-4xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 bg-[rgba(244,190,126,0.08)] border border-[rgba(244,190,126,0.15)] rounded-full px-4 py-1.5 mb-6 animate-in">
-            <span className="text-[#f4be7e] text-sm font-medium">Nouveau</span>
-            <span className="text-[#6b6b73] text-sm">par Market Securities</span>
-            <ChevronRight size={14} className="text-[#6b6b73]" />
-          </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#f5f5f5] mb-6 leading-tight animate-in animate-in-1">
-            Votre patrimoine,{' '}
-            <span className="text-gold-gradient">
-              simplifié
-            </span>
-          </h1>
-          <p className="text-lg sm:text-xl text-[#a0a0a6] mb-8 max-w-2xl mx-auto animate-in animate-in-2">
-            Agrégez tous vos comptes, analysez vos frais, simulez votre avenir financier.
-            La plateforme de gestion patrimoniale par Market Securities.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in animate-in-3">
-            <Link href="/register">
-              <Button size="lg">
-                Créer mon compte gratuit
-                <ArrowRight size={18} className="ml-2" />
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="outline" size="lg">
-                Voir la démo
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-12 border-y border-[rgba(255,255,255,0.04)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {stats.map((stat, i) => (
-            <div key={stat.label} className={`animate-in animate-in-${i + 1}`}>
-              <div className="text-2xl sm:text-3xl font-bold text-[#f5f5f5]">
-                <AnimatedNumber value={stat.value} format={stat.format} delay={i * 100} />
-              </div>
-              <div className="text-sm text-[#6b6b73] mt-1">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#f5f5f5] mb-4">
-              Tout pour piloter votre patrimoine
-            </h2>
-            <p className="text-[#a0a0a6] max-w-2xl mx-auto">
-              Des outils professionnels accessibles à tous, conçus par les experts de Market Securities.
+      <main>
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-14 sm:pb-20 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="text-center lg:text-left">
+            <p className="inline-block text-sm text-[#a0a0a6] bg-white/[0.04] border border-white/[0.08] rounded-full px-3.5 py-1 mb-5">par Market Securities</p>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#f5f5f5] leading-[1.08]">
+              Tout votre patrimoine,<br /><span className="text-gold-gradient">sur un seul écran</span>
+            </h1>
+            <p className="text-lg text-[#a0a0a6] mt-5 max-w-xl mx-auto lg:mx-0">
+              Reliez vos comptes ou saisissez-les à la main. Patrimoine net, répartition, frais, dividendes et projections se calculent tout seuls.
             </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mt-8">
+              <Link href="/register"><Button size="lg" className="w-full">Créer mon compte<ArrowRight size={18} className="ml-2" /></Button></Link>
+              <DemoButton size="lg" />
+            </div>
+            <p className="text-xs text-[#8e8e98] mt-4 flex items-center gap-1.5 justify-center lg:justify-start"><Lock size={12} />La démo utilise des données fictives, sans inscription.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map((feature, i) => (
-              <div
-                key={feature.title}
-                className={`bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] rounded-[16px] p-6 hover:border-[rgba(244,190,126,0.2)] hover:-translate-y-[2px] transition-all duration-[350ms] ease-[cubic-bezier(0.22,1,0.36,1)] group animate-in animate-in-${i + 1}`}
-              >
-                <div className="w-12 h-12 bg-[rgba(244,190,126,0.08)] rounded-[12px] flex items-center justify-center mb-4 group-hover:bg-[rgba(244,190,126,0.12)] transition-colors duration-300">
-                  <feature.icon size={24} className="text-[#f4be7e]" />
-                </div>
-                <h3 className="text-lg font-semibold text-[#f5f5f5] mb-2">{feature.title}</h3>
-                <p className="text-sm text-[#a0a0a6] leading-relaxed">{feature.description}</p>
+          <AppPreview />
+        </section>
+
+        <section aria-label="En bref" className="border-y border-white/[0.05]">
+          <dl className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {FACTS.map((f) => (
+              <div key={f.label}>
+                <dt className="sr-only">{f.label}</dt>
+                <dd className="text-2xl sm:text-3xl font-bold text-[#f5f5f5] tabular-nums">{f.value}</dd>
+                <dd className="text-sm text-[#a0a0a6] mt-1 leading-snug">{f.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section id="fonctionnalites" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 scroll-mt-20">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#f5f5f5] text-center mb-10">Tout pour piloter votre patrimoine</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {FEATURES.map((f) => (
+              <article key={f.title} className="bg-white/[0.03] border border-white/[0.06] rounded-[16px] p-5">
+                <span className="w-10 h-10 bg-[#f4be7e]/10 rounded-[12px] flex items-center justify-center mb-4"><f.icon size={20} className="text-[#f4be7e]" /></span>
+                <h3 className="font-semibold text-[#f5f5f5] mb-1.5">{f.title}</h3>
+                <p className="text-sm text-[#a0a0a6] leading-relaxed">{f.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            {[
+              { icon: Lock, title: 'Lecture seule', text: 'MS Tech lit vos soldes et positions. Il ne peut ni déplacer d\'argent ni passer d\'ordre.' },
+              { icon: Download, title: 'Export à tout moment', text: 'Téléchargez l\'ensemble de vos données depuis les paramètres.' },
+              { icon: Trash2, title: 'Suppression réelle', text: 'Supprimez votre compte dans l\'application : vos données et connexions partent avec lui.' },
+            ].map((b) => (
+              <div key={b.title} className="flex gap-3 p-4 rounded-[14px] border border-white/[0.06]">
+                <b.icon size={18} className="text-[#f4be7e] shrink-0 mt-0.5" />
+                <div><p className="font-semibold text-[#f5f5f5]">{b.title}</p><p className="text-[#a0a0a6] mt-1 leading-relaxed">{b.text}</p></div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center relative">
-          {/* Radial gold glow */}
-          <div className="absolute inset-0 -m-8 bg-[radial-gradient(ellipse_at_center,rgba(244,190,126,0.06)_0%,transparent_70%)] rounded-3xl pointer-events-none" />
-          <div className="relative bg-[rgba(255,255,255,0.03)] border border-[rgba(244,190,126,0.12)] rounded-[20px] p-12">
-            <h2 className="text-3xl font-bold text-[#f5f5f5] mb-4">
-              Prenez le contrôle de votre patrimoine
-            </h2>
-            <p className="text-[#a0a0a6] mb-8">
-              Rejoignez des milliers d&apos;investisseurs qui utilisent MS Tech pour optimiser leur patrimoine.
-            </p>
-            <Link href="/register">
-              <Button size="lg">
-                Commencer gratuitement
-                <ArrowRight size={18} className="ml-2" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-20 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-[#f5f5f5] mb-3">Prenez le contrôle de votre patrimoine</h2>
+          <p className="text-[#a0a0a6] mb-7">Connectez votre banque ou saisissez un premier compte à la main.</p>
+          <Link href="/register"><Button size="lg">Commencer<ArrowRight size={18} className="ml-2" /></Button></Link>
+        </section>
+      </main>
       <Footer />
     </div>
   );

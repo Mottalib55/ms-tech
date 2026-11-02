@@ -1,4 +1,4 @@
-export type ProviderSlug = 'powens' | 'lean' | 'saltedge' | 'coingecko' | 'binance' | 'ibkr';
+export type ProviderSlug = 'powens' | 'lean' | 'saltedge' | 'binance' | 'ibkr' | 'sandbox';
 
 export interface NormalizedAccount {
   externalId: string;
@@ -12,6 +12,7 @@ export interface NormalizedAccount {
 
 export interface NormalizedHolding {
   externalId: string;
+  accountExternalId: string;
   symbol: string;
   name: string;
   quantity: number;
@@ -85,14 +86,25 @@ export interface CallbackResult {
   metadata?: Record<string, unknown>;
 }
 
+export interface SyncCredentials {
+  accessToken: string;
+  /** Second half of an API-key pair (Binance). */
+  apiSecret?: string;
+  /** The provider's id for this connection, when distinct from the token. */
+  externalId?: string;
+}
+
 export interface ProviderConnector {
   readonly slug: ProviderSlug;
   readonly displayName: string;
   readonly region: string;
 
-  initiateConnection(userId: string, callbackUrl: string): Promise<ConnectionInitResult>;
+  /** False until the deployment holds this provider's keys: the UI then says so. */
+  isConfigured(): boolean;
+  /** `state` is opaque and must come back on the callback URL. */
+  initiateConnection(userId: string, callbackUrl: string, state: string): Promise<ConnectionInitResult>;
   handleCallback(params: Record<string, string>): Promise<CallbackResult>;
-  sync(accessToken: string, refreshToken?: string): Promise<SyncResult>;
+  sync(credentials: SyncCredentials): Promise<SyncResult>;
   refreshCredentials(refreshToken: string): Promise<{ accessToken: string; refreshToken?: string; expiresAt?: Date }>;
   verifyWebhook(body: string, signature: string): boolean;
 }

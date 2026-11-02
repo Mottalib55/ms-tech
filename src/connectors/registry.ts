@@ -1,27 +1,19 @@
 import type { ProviderConnector, ProviderSlug } from './types';
+import powens from './powens/client';
+import lean from './lean/client';
+import saltedge from './saltedge/client';
+import binance from './binance/client';
+import ibkr from './ibkr/client';
+import sandbox from './sandbox/client';
 
-const connectors = new Map<ProviderSlug, () => ProviderConnector>();
-
-export function registerConnector(slug: ProviderSlug, factory: () => ProviderConnector) {
-  connectors.set(slug, factory);
-}
+// Explicit, not lazy: the previous fire-and-forget imports raced the first
+// request and answered "Unknown provider".
+const connectors: Record<ProviderSlug, ProviderConnector> = { powens, lean, saltedge, binance, ibkr, sandbox };
 
 export function getConnector(slug: ProviderSlug): ProviderConnector {
-  const factory = connectors.get(slug);
-  if (!factory) {
-    throw new Error(`Unknown provider: ${slug}`);
-  }
-  return factory();
+  const connector = connectors[slug];
+  if (!connector) throw new Error(`Unknown provider: ${slug}`);
+  return connector;
 }
 
-export function listConnectors(): ProviderSlug[] {
-  return Array.from(connectors.keys());
-}
-
-// Lazy registration — each connector registers itself when imported
-import('./powens/client').catch(() => {});
-import('./lean/client').catch(() => {});
-import('./saltedge/client').catch(() => {});
-import('./coingecko/client').catch(() => {});
-import('./binance/client').catch(() => {});
-import('./ibkr/client').catch(() => {});
+export const listConnectors = () => Object.values(connectors);

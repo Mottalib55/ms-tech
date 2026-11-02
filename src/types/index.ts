@@ -1,162 +1,52 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  currency: string;
-  language: string;
-  createdAt: string;
-}
-
 export interface Account {
-  id: string;
-  name: string;
-  institution: string;
-  type: 'brokerage' | 'bank' | 'crypto' | 'real-estate' | 'insurance';
-  balance: number;
-  currency: string;
-  lastSync: string;
-  status: 'connected' | 'error' | 'pending';
-  color: string;
+  id: string; name: string; institution: string; type: string; balance: number; currency: string;
+  lastSync: string | null; status: string; color: string; connectionId: string | null;
+  positionCount: number; provider: string | null; manual: boolean; syncError: string | null;
 }
-
 export interface Holding {
-  id: string;
-  symbol: string;
-  name: string;
-  quantity: number;
-  avgPrice: number;
-  currentPrice: number;
-  currency: string;
-  assetClass: AssetClass;
-  sector: string;
-  region: string;
-  accountId: string;
-  dailyChange: number;
+  id: string; accountId: string; symbol: string; name: string; quantity: number; avgPrice: number; currentPrice: number;
+  currency: string; assetClass: string; sector: string; region: string; dailyChange: number;
+  externalId?: string | null; account?: { name: string; connectionId: string | null };
 }
-
-export type AssetClass = 'stocks' | 'bonds' | 'real-estate' | 'crypto' | 'cash' | 'etf' | 'commodities';
-
-export interface Fee {
-  id: string;
-  accountId: string;
-  accountName: string;
-  type: 'management' | 'transaction' | 'custody' | 'exchange' | 'performance';
-  label: string;
-  amount: number;
-  percentage: number;
-  frequency: 'annual' | 'per-transaction' | 'monthly' | 'quarterly';
-  suggestion?: string;
-  alternativeFee?: number;
-}
-
-export interface Dividend {
-  id: string;
-  holdingId: string;
-  symbol: string;
-  name: string;
-  amount: number;
-  currency: string;
-  exDate: string;
-  payDate: string;
-  status: 'paid' | 'confirmed' | 'projected';
-  frequency: 'monthly' | 'quarterly' | 'semi-annual' | 'annual';
-}
-
-export interface BudgetCategory {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-  budgeted: number;
-  spent: number;
-}
-
-export interface MonthlyBudget {
-  month: string;
-  income: number;
-  expenses: number;
-  savings: number;
-  categories: BudgetCategory[];
-}
-
-export interface PerformancePoint {
-  date: string;
-  value: number;
-}
-
-export interface AllocationItem {
-  name: string;
-  value: number;
-  color: string;
-}
-
-export interface MonteCarloParams {
-  currentAge: number;
-  retirementAge: number;
-  currentCapital: number;
-  monthlyContribution: number;
-  expectedReturn: number;
-  volatility: number;
-  inflation: number;
-  targetAmount: number;
-}
-
-export interface MonteCarloResult {
-  age: number;
-  pessimistic: number;
-  median: number;
-  optimistic: number;
-  p10: number;
-  p90: number;
-}
-
-export interface SimulatorResult {
-  year: number;
-  capital: number;
-  contributions: number;
-  interest: number;
-}
-
-export interface LoanResult {
-  monthlyPayment: number;
-  totalCost: number;
-  totalInterest: number;
-  amortization: { month: number; principal: number; interest: number; remaining: number }[];
-}
-
 export interface Transaction {
-  id: string;
-  accountId: string;
-  externalId?: string;
-  type: 'buy' | 'sell' | 'deposit' | 'withdrawal' | 'dividend' | 'fee' | 'transfer';
-  symbol?: string;
-  name?: string;
-  quantity?: number;
-  price?: number;
-  amount: number;
-  currency: string;
-  date: string;
-  description?: string;
+  id: string; accountId: string; type: string; symbol: string | null; name: string | null; amount: number;
+  currency: string; date: string; description: string | null;
 }
-
-export interface ProviderConnectionInfo {
-  id: string;
-  provider: string;
-  status: 'pending' | 'active' | 'error' | 'disconnected';
-  externalId?: string;
-  lastSyncAt?: string;
-  lastSyncStatus?: string;
-  lastSyncError?: string;
-  createdAt: string;
+export interface AccountDetail extends Omit<Account, 'positionCount' | 'provider' | 'syncError'> {
+  holdings: Holding[]; transactions: Transaction[];
+  connection: { id: string; provider: string; status: string; lastSyncError: string | null } | null;
 }
-
-export interface SyncLogEntry {
-  id: string;
-  connectionId: string;
-  status: 'started' | 'success' | 'error';
-  durationMs?: number;
-  recordCount?: number;
-  error?: string;
-  createdAt: string;
+export interface Fee {
+  id: string; accountId: string; accountName: string; type: string; label: string; amount: number; percentage: number;
+  frequency: string; suggestion: string | null; alternativeFee: number | null; isManual: boolean;
+}
+export interface Dividend {
+  id: string; holdingId: string; symbol: string; name: string; amount: number; currency: string;
+  exDate: string; payDate: string; status: string; frequency: string; isManual: boolean;
+}
+export interface BudgetCategory { id?: string; name: string; icon: string; color: string; budgeted: number; spent: number }
+export interface MonthlyBudget { id: string; month: string; income: number; expenses: number; savings: number; categories: BudgetCategory[] }
+export interface PerformancePoint { date: string; value: number }
+export interface AllocationSlice { key: string; name: string; color: string; value: number; percent: number }
+export interface Summary {
+  currency: string; netWorth: number; assets: number; debts: number; allocation: AllocationSlice[];
+  accountCount: number; connectedCount: number; errorCount: number; positionCount: number; passiveIncome: number;
+  diversification: number; change30d: number | null; lastSync: string | null;
+}
+export interface Connection {
+  id: string; provider: string; status: string; lastSyncAt: string | null; lastSyncStatus: string | null;
+  lastSyncError: string | null; createdAt: string; _count: { financialAccounts: number };
+}
+export interface Provider { slug: string; name: string; region: string; configured: boolean; kind: 'api_key' | 'redirect' }
+export interface Alert { id: string; level: 'error' | 'warning' | 'info'; title: string; detail: string; href: string }
+export interface Me { id: string; name: string | null; email: string; currency: string; language: string; isDemo: boolean; createdAt: string }
+export interface MonteCarloParams {
+  currentAge: number; retirementAge: number; currentCapital: number; monthlyContribution: number;
+  expectedReturn: number; volatility: number; inflation: number; targetAmount: number;
+}
+export interface MonteCarloResult { age: number; pessimistic: number; p10: number; median: number; p90: number; optimistic: number }
+export interface SimulatorResult { year: number; capital: number; contributions: number; interest: number }
+export interface LoanResult {
+  monthlyPayment: number; totalCost: number; totalInterest: number;
+  amortization: { month: number; principal: number; interest: number; remaining: number }[];
 }

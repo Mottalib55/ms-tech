@@ -1,51 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/server/db';
-import { authOptions } from '@/server/auth';
-import { getConnector } from '@/connectors/registry';
-import { decrypt } from '@/server/encryption';
-import { persistSyncResult } from '@/server/sync';
-import type { ProviderSlug } from '@/connectors/types';
+import { ApiError, notFound, requireUser, route } from '@/server/http';
+import { enforce } from '@/server/limiter';
+import { syncConnection } from '@/server/sync';
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ connectionId: string }> }
-) {
+export const POST = route(async (_req: Request, { params }: { params: Promise<{ connectionId: string }> }) => {
+  const user = await requireUser();
+  const { connectionId } = await params;
+  await enforce(`sync:${user.id}`, 30, 300);
+  const connection = await prisma.providerConnection.findFirst({ where: { id: connectionId, userId: user.id } });
+  if (!connection) throw notFound('Connexion');
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { connectionId } = await params;
-
-    const connection = await prisma.providerConnection.findFirst({
-      where: {
-        id: connectionId,
-        userId: session.user.id,
-      },
-    });
-
-    if (!connection) {
-      return NextResponse.json({ error: 'Connection not found' }, { status: 404 });
-    }
-
-    if (!connection.accessTokenEnc) {
-      return NextResponse.json({ error: 'Connection not authenticated' }, { status: 400 });
-    }
-
-    const connector = getConnector(connection.provider as ProviderSlug);
-    const accessToken = await decrypt(connection.accessTokenEnc);
-
-    const syncResult = await connector.sync(accessToken);
-    const counts = await persistSyncResult(connectionId, session.user.id, syncResult);
-
-    return NextResponse.json({
-      success: true,
-      ...counts,
-    });
+    return await syncConnection(connectionId);
   } catch (error) {
-    console.error('Error syncing connection:', error);
-    return NextResponse.json({ error: 'Sync failed' }, { status: 500 });
+    throw new ApiError(502, error instanceof Error ? error.message : 'Synchronisation impossible');
   }
-}
+});

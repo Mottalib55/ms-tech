@@ -1,235 +1,138 @@
 import { prisma } from './db';
-import type { SyncResult } from '@/connectors/types';
+import { decrypt, encrypt } from './encryption';
+import { recordSnapshot } from './summary';
+import { getConnector } from '@/connectors/registry';
+import type { ProviderSlug, SyncResult } from '@/connectors/types';
 
-export async function persistSyncResult(
-  connectionId: string,
-  userId: string,
-  result: SyncResult
-): Promise<{ accountCount: number; holdingCount: number; feeCount: number; dividendCount: number; transactionCount: number }> {
-  const startTime = Date.now();
+const num = (n: unknown) => (typeof n === 'number' && Number.isFinite(n) ? n : 0);
 
-  try {
-    // Upsert accounts
-    const accountIdMap = new Map<string, string>();
-
-    for (const account of result.accounts) {
-      const existing = await prisma.financialAccount.findFirst({
-        where: { connectionId, externalId: account.externalId },
-      });
-
-      if (existing) {
-        await prisma.financialAccount.update({
-          where: { id: existing.id },
-          data: {
-            name: account.name,
-            institution: account.institution,
-            type: account.type,
-            balance: account.balance,
-            currency: account.currency,
-            color: account.color ?? existing.color,
-            lastSync: new Date(),
-            status: 'connected',
-          },
-        });
-        accountIdMap.set(account.externalId, existing.id);
-      } else {
-        const created = await prisma.financialAccount.create({
-          data: {
-            userId,
-            connectionId,
-            externalId: account.externalId,
-            name: account.name,
-            institution: account.institution,
-            type: account.type,
-            balance: account.balance,
-            currency: account.currency,
-            color: account.color ?? '#f4be7e',
-            lastSync: new Date(),
-            status: 'connected',
-          },
-        });
-        accountIdMap.set(account.externalId, created.id);
-      }
+/**
+ * Writes one provider response as the new truth for its connection, in one
+ * transaction: an interrupted sync leaves the previous figures rather than half
+ * of the new ones. What the provider no longer reports disappears; what the
+ * user entered by hand on a synced account stays.
+ */
+export async function persistSyncResult(connectionId: string, userId: string, result: SyncResult) {
+  const now = new Date();
+  await prisma.$transaction(async (tx) => {
+    const accountIds = new Map<string, string>();
+    for (const a of result.accounts) {
+      const existing = await tx.financialAccount.findFirst({ where: { connectionId, externalId: a.externalId } });
+      const data = {
+        institution: a.institution, type: a.type, balance: num(a.balance), currency: a.currency,
+        lastSync: now, status: 'connected',
+      };
+      const row = existing
+        // The name stays: the user may have renamed it.
+        ? await tx.financialAccount.update({ where: { id: existing.id }, data: { ...data, color: a.color ?? existing.color } })
+        : await tx.financialAccount.create({
+            data: { ...data, userId, connectionId, externalId: a.externalId, name: a.name, color: a.color ?? '#f4be7e' },
+          });
+      accountIds.set(a.externalId, row.id);
     }
+    await tx.financialAccount.deleteMany({
+      where: { connectionId, externalId: { notIn: result.accounts.map((a) => a.externalId) } },
+    });
 
-    // Upsert holdings
-    const holdingIdMap = new Map<string, string>();
-
-    for (const holding of result.holdings) {
-      // Find the account this holding belongs to via holdings' accountExternalId
-      // Holdings don't have accountExternalId directly — they link via the account
-      // We need to find which account the holding is in
-      const accountId = accountIdMap.values().next().value; // Fallback
+    const holdingIds = new Map<string, string>();
+    const reported = new Map<string, string[]>();
+    for (const h of result.holdings) {
+      const accountId = accountIds.get(h.accountExternalId);
       if (!accountId) continue;
-
-      const existing = await prisma.holding.findFirst({
-        where: { accountId, externalId: holding.externalId },
+      const { accountExternalId: _a, externalId, ...fields } = h;
+      const clean = { ...fields, quantity: num(h.quantity), avgPrice: num(h.avgPrice), currentPrice: num(h.currentPrice), dailyChange: num(h.dailyChange) };
+      const existing = await tx.holding.findFirst({ where: { accountId, externalId } });
+      const row = existing
+        ? await tx.holding.update({ where: { id: existing.id }, data: clean })
+        : await tx.holding.create({ data: { ...clean, accountId, externalId } });
+      holdingIds.set(externalId, row.id);
+      reported.set(accountId, [...(reported.get(accountId) ?? []), externalId]);
+    }
+    for (const accountId of accountIds.values()) {
+      await tx.holding.deleteMany({
+        where: { accountId, externalId: { not: null, notIn: reported.get(accountId) ?? [] } },
       });
-
-      if (existing) {
-        await prisma.holding.update({
-          where: { id: existing.id },
-          data: {
-            symbol: holding.symbol,
-            name: holding.name,
-            quantity: holding.quantity,
-            avgPrice: holding.avgPrice,
-            currentPrice: holding.currentPrice,
-            currency: holding.currency,
-            assetClass: holding.assetClass,
-            sector: holding.sector,
-            region: holding.region,
-            dailyChange: holding.dailyChange,
-          },
-        });
-        holdingIdMap.set(holding.externalId, existing.id);
-      } else {
-        const created = await prisma.holding.create({
-          data: {
-            accountId,
-            externalId: holding.externalId,
-            symbol: holding.symbol,
-            name: holding.name,
-            quantity: holding.quantity,
-            avgPrice: holding.avgPrice,
-            currentPrice: holding.currentPrice,
-            currency: holding.currency,
-            assetClass: holding.assetClass,
-            sector: holding.sector,
-            region: holding.region,
-            dailyChange: holding.dailyChange,
-          },
-        });
-        holdingIdMap.set(holding.externalId, created.id);
-      }
     }
 
-    // Upsert fees
-    for (const fee of result.fees) {
-      const accountId = accountIdMap.get(fee.accountExternalId);
+    // Fees and dividends carry no provider id: replaced wholesale, or every
+    // sync would add another copy.
+    const ids = [...accountIds.values()];
+    await tx.fee.deleteMany({ where: { accountId: { in: ids }, isManual: false } });
+    await tx.dividend.deleteMany({ where: { holding: { accountId: { in: ids } }, isManual: false } });
+    for (const f of result.fees) {
+      const accountId = accountIds.get(f.accountExternalId);
       if (!accountId) continue;
-
-      await prisma.fee.create({
-        data: {
-          accountId,
-          accountName: fee.accountName,
-          type: fee.type,
-          label: fee.label,
-          amount: fee.amount,
-          percentage: fee.percentage,
-          frequency: fee.frequency,
-          suggestion: fee.suggestion,
-          alternativeFee: fee.alternativeFee,
-        },
-      });
+      const { accountExternalId: _a, ...fee } = f;
+      await tx.fee.create({ data: { ...fee, accountId } });
     }
-
-    // Upsert dividends
-    for (const div of result.dividends) {
-      const holdingId = holdingIdMap.get(div.holdingExternalId);
+    for (const d of result.dividends) {
+      const holdingId = holdingIds.get(d.holdingExternalId);
       if (!holdingId) continue;
+      const { holdingExternalId: _h, ...div } = d;
+      await tx.dividend.create({ data: { ...div, holdingId } });
+    }
 
-      await prisma.dividend.create({
+    for (const t of result.transactions) {
+      const accountId = accountIds.get(t.accountExternalId);
+      if (!accountId) continue;
+      const { accountExternalId: _a, externalId, ...fields } = t;
+      const existing = await tx.transaction.findFirst({ where: { accountId, externalId } });
+      if (existing) await tx.transaction.update({ where: { id: existing.id }, data: fields });
+      else await tx.transaction.create({ data: { ...fields, accountId, externalId } });
+    }
+
+    await tx.providerConnection.update({
+      where: { id: connectionId },
+      data: { status: 'active', lastSyncAt: now, lastSyncStatus: 'success', lastSyncError: null },
+    });
+  }, { timeout: 30_000 });
+
+  const counts = {
+    accountCount: result.accounts.length, holdingCount: result.holdings.length,
+    feeCount: result.fees.length, dividendCount: result.dividends.length, transactionCount: result.transactions.length,
+  };
+  await prisma.syncLog.create({
+    data: { connectionId, status: 'success', recordCount: Object.values(counts).reduce((a, b) => a + b, 0) },
+  });
+  await recordSnapshot(userId);
+  return counts;
+}
+
+/** The one way a connection gets refreshed: button, cron, webhook and first connection. */
+export async function syncConnection(connectionId: string) {
+  const connection = await prisma.providerConnection.findUnique({ where: { id: connectionId } });
+  if (!connection) throw new Error('Connexion introuvable');
+  if (!connection.accessTokenEnc) throw new Error('Cette connexion n\'a pas été finalisée. Reconnectez le compte.');
+  const started = Date.now();
+  const connector = getConnector(connection.provider as ProviderSlug);
+  try {
+    let accessToken = await decrypt(connection.accessTokenEnc);
+    if (connection.tokenExpiresAt && connection.tokenExpiresAt < new Date() && connection.refreshTokenEnc) {
+      const fresh = await connector.refreshCredentials(await decrypt(connection.refreshTokenEnc));
+      accessToken = fresh.accessToken;
+      await prisma.providerConnection.update({
+        where: { id: connectionId },
         data: {
-          holdingId,
-          symbol: div.symbol,
-          name: div.name,
-          amount: div.amount,
-          currency: div.currency,
-          exDate: div.exDate,
-          payDate: div.payDate,
-          status: div.status,
-          frequency: div.frequency,
+          accessTokenEnc: await encrypt(fresh.accessToken),
+          refreshTokenEnc: fresh.refreshToken ? await encrypt(fresh.refreshToken) : connection.refreshTokenEnc,
+          tokenExpiresAt: fresh.expiresAt ?? null,
         },
       });
     }
-
-    // Upsert transactions
-    for (const tx of result.transactions) {
-      const accountId = accountIdMap.get(tx.accountExternalId);
-      if (!accountId) continue;
-
-      const existing = await prisma.transaction.findFirst({
-        where: { accountId, externalId: tx.externalId },
-      });
-
-      if (!existing) {
-        await prisma.transaction.create({
-          data: {
-            accountId,
-            externalId: tx.externalId,
-            type: tx.type,
-            symbol: tx.symbol,
-            name: tx.name,
-            quantity: tx.quantity,
-            price: tx.price,
-            amount: tx.amount,
-            currency: tx.currency,
-            date: tx.date,
-            description: tx.description,
-          },
-        });
-      }
-    }
-
-    const durationMs = Date.now() - startTime;
-
-    // Update connection
-    await prisma.providerConnection.update({
-      where: { id: connectionId },
-      data: {
-        lastSyncAt: new Date(),
-        lastSyncStatus: 'success',
-        lastSyncError: null,
-      },
+    const result = await connector.sync({
+      accessToken,
+      apiSecret: connection.apiSecretEnc ? await decrypt(connection.apiSecretEnc) : undefined,
+      externalId: connection.externalId ?? undefined,
     });
-
-    // Log sync
-    const totalRecords =
-      result.accounts.length +
-      result.holdings.length +
-      result.fees.length +
-      result.dividends.length +
-      result.transactions.length;
-
-    await prisma.syncLog.create({
-      data: {
-        connectionId,
-        status: 'success',
-        durationMs,
-        recordCount: totalRecords,
-      },
-    });
-
-    return {
-      accountCount: result.accounts.length,
-      holdingCount: result.holdings.length,
-      feeCount: result.fees.length,
-      dividendCount: result.dividends.length,
-      transactionCount: result.transactions.length,
-    };
+    return await persistSyncResult(connectionId, connection.userId, result);
   } catch (error) {
-    const durationMs = Date.now() - startTime;
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
+    const message = error instanceof Error ? error.message : 'Erreur inconnue';
     await prisma.providerConnection.update({
       where: { id: connectionId },
-      data: {
-        lastSyncAt: new Date(),
-        lastSyncStatus: 'error',
-        lastSyncError: errorMessage,
-      },
+      data: { status: 'error', lastSyncAt: new Date(), lastSyncStatus: 'error', lastSyncError: message },
     });
-
-    await prisma.syncLog.create({
-      data: {
-        connectionId,
-        status: 'error',
-        durationMs,
-        error: errorMessage,
-      },
-    });
-
+    await prisma.financialAccount.updateMany({ where: { connectionId }, data: { status: 'error' } });
+    await prisma.syncLog.create({ data: { connectionId, status: 'error', durationMs: Date.now() - started, error: message } });
     throw error;
   }
 }

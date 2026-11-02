@@ -9,6 +9,10 @@ datasource db {
 // ─── NextAuth Models ─────────────────────────────────────────────
 
 model User {
+  isDemo             Boolean   @default(false)
+  tokenVersion       Int       @default(0)
+  resetTokenHash     String?
+  resetTokenExpires  DateTime?
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
@@ -79,6 +83,8 @@ model ProviderConnection {
   externalId        String?
   accessTokenEnc    String?
   refreshTokenEnc   String?
+  apiSecretEnc      String?
+  stateHash         String?
   tokenExpiresAt    DateTime?
   lastSyncAt        DateTime?
   lastSyncStatus    String?
@@ -128,12 +134,13 @@ model FinancialAccount {
   updatedAt       DateTime @updatedAt
 
   user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  connection ProviderConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  connection ProviderConnection? @relation(fields: [connectionId], references: [id], onDelete: Cascade)
   holdings   Holding[]
   fees       Fee[]
   transactions Transaction[]
 
   @@index([userId])
+  @@index([connectionId])
 }
 
 model Holding {
@@ -170,6 +177,7 @@ model Fee {
   frequency      String
   suggestion     String?
   alternativeFee Float?
+  isManual       Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -189,6 +197,7 @@ model Dividend {
   payDate   String
   status    String
   frequency String
+  isManual  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

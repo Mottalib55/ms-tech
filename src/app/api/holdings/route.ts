@@ -1,42 +1,24 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/server/db';
-import { authOptions } from '@/server/auth';
+import { ownedAccount, parseBody, requireUser, route } from '@/server/http';
+import { adjustManualBalance } from '@/server/holdings';
+import { recordSnapshot } from '@/server/summary';
+import { holdingSchema } from '@/server/validations';
 
-export async function GET() {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const userId = session.user.id;
+export const GET = route(async () => {
+  const user = await requireUser();
+  return prisma.holding.findMany({
+    where: { account: { userId: user.id } },
+    include: { account: { select: { name: true, connectionId: true } } },
+    orderBy: { symbol: 'asc' },
+  });
+});
 
-    const holdings = await prisma.holding.findMany({
-      where: {
-        account: { userId },
-      },
-      select: {
-        id: true,
-        symbol: true,
-        name: true,
-        quantity: true,
-        avgPrice: true,
-        currentPrice: true,
-        currency: true,
-        assetClass: true,
-        sector: true,
-        region: true,
-        accountId: true,
-        dailyChange: true,
-      },
-    });
-
-    return NextResponse.json(holdings);
-  } catch (error) {
-    console.error('Error fetching holdings:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch holdings' },
-      { status: 500 }
-    );
-  }
-}
+export const POST = route(async (req: Request) => {
+  const user = await requireUser();
+  const data = await parseBody(req, holdingSchema);
+  await ownedAccount(user.id, data.accountId);
+  const holding = await prisma.holding.create({ data });
+  await adjustManualBalance(data.accountId, data.quantity * data.currentPrice, data.currency);
+  await recordSnapshot(user.id);
+  return holding;
+});

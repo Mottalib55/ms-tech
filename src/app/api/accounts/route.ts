@@ -1,37 +1,39 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/server/db';
-import { authOptions } from '@/server/auth';
+import { parseBody, requireUser, route } from '@/server/http';
+import { recordSnapshot } from '@/server/summary';
+import { accountSchema } from '@/server/validations';
+import { colorForType } from '@/server/colors';
 
-export async function GET() {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const userId = session.user.id;
+export const GET = route(async () => {
+  const user = await requireUser();
+  const accounts = await prisma.financialAccount.findMany({
+    where: { userId: user.id },
+    orderBy: [{ createdAt: 'asc' }],
+    include: { connection: { select: { provider: true, status: true, lastSyncError: true } }, _count: { select: { holdings: true } } },
+  });
+  return accounts.map(({ userId: _u, externalId: _e, _count, connection, ...a }) => ({
+    ...a,
+    positionCount: _count.holdings,
+    provider: connection?.provider ?? null,
+    manual: !a.connectionId,
+    syncError: connection?.lastSyncError ?? null,
+  }));
+});
 
-    const accounts = await prisma.financialAccount.findMany({
-      where: { userId },
-      select: {
-        id: true,
-        name: true,
-        institution: true,
-        type: true,
-        balance: true,
-        currency: true,
-        lastSync: true,
-        status: true,
-        color: true,
-      },
-    });
-
-    return NextResponse.json(accounts);
-  } catch (error) {
-    console.error('Error fetching accounts:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch accounts' },
-      { status: 500 }
-    );
-  }
-}
+export const POST = route(async (req: Request) => {
+  const user = await requireUser();
+  const data = await parseBody(req, accountSchema);
+  const account = await prisma.financialAccount.create({
+    data: {
+      ...data,
+      institution: data.institution || 'Saisie manuelle',
+      balance: data.type === 'loan' ? Math.abs(data.balance) : data.balance,
+      userId: user.id,
+      color: colorForType(data.type),
+      status: 'manual',
+      lastSync: new Date(),
+    },
+  });
+  await recordSnapshot(user.id);
+  return account;
+});

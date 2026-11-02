@@ -1,74 +1,66 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { randomUUID } from 'node:crypto';
 import { prisma } from '@/server/db';
-import { authOptions } from '@/server/auth';
+import { ApiError, parseBody, requireUser, route } from '@/server/http';
+import { enforce } from '@/server/limiter';
 import { getConnector } from '@/connectors/registry';
-import { connectProviderSchema } from '@/server/validations';
-import type { ProviderSlug } from '@/connectors/types';
+import { encrypt } from '@/server/encryption';
+import { syncConnection } from '@/server/sync';
+import { appOrigin, availableProviders, hashState, newState } from '@/server/connections';
+import { connectKeysSchema, connectProviderSchema } from '@/server/validations';
 
-export async function GET() {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export const GET = route(async () => {
+  const user = await requireUser();
+  const connections = await prisma.providerConnection.findMany({
+    // An abandoned consent screen is not a connection.
+    where: { userId: user.id, status: { not: 'pending' } },
+    orderBy: { createdAt: 'asc' },
+    select: {
+      id: true, provider: true, status: true, lastSyncAt: true, lastSyncStatus: true, lastSyncError: true, createdAt: true,
+      _count: { select: { financialAccounts: true } },
+    },
+  });
+  return { connections, providers: availableProviders(user.isDemo) };
+});
 
-    const connections = await prisma.providerConnection.findMany({
-      where: { userId: session.user.id },
-      select: {
-        id: true,
-        provider: true,
-        status: true,
-        externalId: true,
-        lastSyncAt: true,
-        lastSyncStatus: true,
-        lastSyncError: true,
-        createdAt: true,
-      },
-    });
+export const POST = route(async (req: Request) => {
+  const user = await requireUser();
+  await enforce(`connect:${user.id}`, 20, 300);
+  const body = (await req.json().catch(() => null)) as { provider?: string } | null;
+  if (!body) throw new ApiError(400, 'Requête invalide');
 
-    return NextResponse.json(connections);
-  } catch (error) {
-    console.error('Error fetching connections:', error);
-    return NextResponse.json({ error: 'Failed to fetch connections' }, { status: 500 });
-  }
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await req.json();
-    const parsed = connectProviderSchema.safeParse(body);
-
-    if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
-    }
-
-    const { provider, callbackUrl } = parsed.data;
-    const connector = getConnector(provider as ProviderSlug);
-    const origin = callbackUrl || `${process.env.NEXTAUTH_URL}/dashboard/connections`;
-    const result = await connector.initiateConnection(session.user.id, origin);
-
-    // Create pending connection record
+  if (body.provider === 'binance' || body.provider === 'ibkr') {
+    const { provider, apiKey, apiSecret } = connectKeysSchema.parse(body);
+    const available = availableProviders(user.isDemo).find((p) => p.slug === provider);
+    if (!available?.configured) throw new ApiError(503, `${available?.name ?? provider} n'est pas encore activé sur cette plateforme.`);
     const connection = await prisma.providerConnection.create({
       data: {
-        userId: session.user.id,
-        provider,
-        status: 'pending',
-        externalId: result.connectionId,
+        userId: user.id, provider, status: 'pending', externalId: `${provider}-${randomUUID()}`,
+        accessTokenEnc: await encrypt(apiKey), apiSecretEnc: await encrypt(apiSecret),
       },
     });
-
-    return NextResponse.json({
-      connectionId: connection.id,
-      ...result,
-    });
-  } catch (error) {
-    console.error('Error initiating connection:', error);
-    return NextResponse.json({ error: 'Failed to initiate connection' }, { status: 500 });
+    try {
+      await syncConnection(connection.id);
+    } catch {
+      // Credentials the provider refuses are not worth keeping: say so and leave nothing behind.
+      await prisma.providerConnection.delete({ where: { id: connection.id } });
+      throw new ApiError(400, provider === 'binance'
+        ? 'Binance a refusé ces clés. Vérifiez la clé, le secret et l\'autorisation « lecture ».'
+        : 'Interactive Brokers a refusé ces identifiants. Vérifiez le jeton et le numéro de requête Flex.');
+    }
+    return { connectionId: connection.id, type: 'done' };
   }
-}
+
+  const { provider } = connectProviderSchema.parse(body);
+  const available = availableProviders(user.isDemo).find((p) => p.slug === provider);
+  if (!available) throw new ApiError(403, 'Ce fournisseur n\'est pas disponible.');
+  if (!available.configured) throw new ApiError(503, `${available.name} n'est pas encore activé sur cette plateforme.`);
+
+  const connector = getConnector(provider);
+  const state = newState();
+  const result = await connector.initiateConnection(user.id, `${appOrigin()}/api/connections/callback`, state);
+  await prisma.providerConnection.deleteMany({ where: { userId: user.id, provider, status: 'pending' } });
+  const connection = await prisma.providerConnection.create({
+    data: { userId: user.id, provider, status: 'pending', stateHash: hashState(state), externalId: result.connectionId },
+  });
+  return { connectionId: connection.id, ...result };
+});

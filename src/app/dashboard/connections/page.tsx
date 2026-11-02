@@ -1,271 +1,158 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  Link2,
-  Plus,
-  RefreshCw,
-  Trash2,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  ExternalLink,
-} from 'lucide-react';
-import Card, { CardHeader, CardTitle } from '@/components/ui/Card';
+import { FormEvent, Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AlertCircle, CheckCircle2, Clock, Link2, Lock, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
-import { useConnections } from '@/hooks/useConnections';
-import { formatRelativeTime } from '@/lib/utils';
+import { ConfirmDialog, EmptyState, FormError, Loader, PageHeader } from '@/components/ui/kit';
 import { toast } from '@/components/ui/Toast';
+import { useAction, useConnections } from '@/hooks/data';
+import { api } from '@/lib/api';
+import { formatRelativeTime } from '@/lib/utils';
+import type { Connection, Provider } from '@/types';
 
-const providerInfo: Record<string, { name: string; region: string; description: string }> = {
-  powens: {
-    name: 'Powens (Budget Insight)',
-    region: 'France / EU',
-    description: 'Banques, PEA, CTO, Assurance Vie, Crypto, Immobilier',
-  },
-  lean: {
-    name: 'Lean Technologies',
-    region: 'UAE / MENA',
-    description: 'Banking, balances, transactions',
-  },
-  saltedge: {
-    name: 'Salt Edge',
-    region: 'Global (50+ pays)',
-    description: '5000+ institutions bancaires',
-  },
-  binance: {
-    name: 'Binance',
-    region: 'Global',
-    description: 'Crypto holdings, trades, balances',
-  },
-  ibkr: {
-    name: 'Interactive Brokers',
-    region: 'Global (170 marchés)',
-    description: 'Positions, transactions, multi-devises',
-  },
+const DESCRIPTIONS: Record<string, string> = {
+  powens: 'Banques, PEA, assurance-vie en France et en Europe',
+  lean: 'Banques aux Émirats et au Moyen-Orient',
+  saltedge: 'Plus de 5 000 banques dans le monde',
+  binance: 'Soldes crypto, avec une clé en lecture seule',
+  ibkr: 'Positions et soldes multi-devises',
+  sandbox: 'Une fausse banque pour essayer le parcours complet',
 };
 
-const statusConfig: Record<string, { label: string; variant: 'success' | 'danger' | 'warning' | 'default'; icon: typeof CheckCircle2 }> = {
-  active: { label: 'Actif', variant: 'success', icon: CheckCircle2 },
-  error: { label: 'Erreur', variant: 'danger', icon: AlertCircle },
-  pending: { label: 'En attente', variant: 'warning', icon: Clock },
-  disconnected: { label: 'Déconnecté', variant: 'default', icon: AlertCircle },
+const CONNECT_ERRORS: Record<string, string> = {
+  denied: 'Connexion annulée : vous avez refusé l\'accès.',
+  expired: 'Ce lien de connexion a expiré. Recommencez.',
+  failed: 'Le fournisseur n\'a pas pu finaliser la connexion. Réessayez.',
+  sync: 'Compte relié, mais la première synchronisation a échoué. Le détail figure sur la carte.',
 };
+
+function ConnectResult({ providers }: { providers: Provider[] }) {
+  const params = useSearchParams();
+  const router = useRouter();
+  useEffect(() => {
+    const ok = params.get('connected');
+    const err = params.get('connect_error');
+    if (ok) toast(`${providers.find((p) => p.slug === ok)?.name ?? 'Compte'} connecté`, 'success');
+    if (err) toast(CONNECT_ERRORS[err] ?? 'Connexion impossible.', 'error');
+    if (ok || err) router.replace('/dashboard/connections');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+  return null;
+}
+
+const KEY_FORMS: Record<string, { intro: string; key: string; secret: string; secretHidden: boolean }> = {
+  binance: { intro: 'Créez sur Binance une clé API avec la seule autorisation « lecture », sans retrait ni trading.', key: 'Clé API', secret: 'Secret API', secretHidden: true },
+  ibkr: { intro: 'Dans le Client Portal, ouvrez Flex Queries : créez une requête Activity avec Open Positions, Account Information et Net Asset Value, puis générez un jeton Flex Web Service.', key: 'Jeton Flex', secret: 'Numéro de la requête Flex', secretHidden: false },
+};
+
+function KeysForm({ provider, onDone }: { provider: Provider; onDone: () => void }) {
+  const form = KEY_FORMS[provider.slug];
+  const [apiKey, setApiKey] = useState('');
+  const [apiSecret, setApiSecret] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const save = useAction((body: object) => api('/api/connections', { method: 'POST', body }), { success: `${provider.name} connecté`, onSuccess: onDone, onError: (e) => setError(e.message) });
+  const submit = (e: FormEvent) => { e.preventDefault(); setError(null); save.mutate({ provider: provider.slug, apiKey, apiSecret }); };
+  return (
+    <form onSubmit={submit} noValidate className="space-y-4">
+      <FormError message={error} />
+      <p className="text-sm text-[#a0a0a6]">{form.intro}</p>
+      <Input id="provider-key" label={form.key} value={apiKey} onChange={(e) => setApiKey(e.target.value)} autoComplete="off" autoCapitalize="none" />
+      <Input id="provider-secret" label={form.secret} type={form.secretHidden ? 'password' : 'text'} value={apiSecret} onChange={(e) => setApiSecret(e.target.value)} autoComplete="off" autoCapitalize="none" />
+      <Button type="submit" loading={save.isPending} className="w-full">Connecter {provider.name}</Button>
+      <p className="text-xs text-[#8e8e98] flex items-center gap-1.5 justify-center"><Lock size={12} />Identifiants chiffrés, jamais affichés à nouveau.</p>
+    </form>
+  );
+}
+
+function ProviderPicker({ providers, onClose }: { providers: Provider[]; onClose: () => void }) {
+  const [keyFor, setKeyFor] = useState<Provider | null>(null);
+  const start = useAction((provider: string) => api<{ redirectUrl?: string; widgetUrl?: string }>('/api/connections', { method: 'POST', body: { provider } }), {
+    onSuccess: (r) => {
+      const url = r.redirectUrl ?? r.widgetUrl;
+      if (url) window.location.href = url;
+      else { toast('Connexion établie', 'success'); onClose(); }
+    },
+  });
+  if (keyFor) return <KeysForm provider={keyFor} onDone={onClose} />;
+  return (
+    <div className="space-y-2">
+      {providers.map((p) => (
+        <button
+          key={p.slug}
+          disabled={!p.configured || start.isPending}
+          onClick={() => (p.kind === 'api_key' ? setKeyFor(p) : start.mutate(p.slug))}
+          className="w-full flex items-center justify-between gap-3 p-3 min-h-16 text-left bg-white/[0.04] hover:bg-white/[0.07] rounded-[12px] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <span className="min-w-0">
+            <span className="flex flex-wrap items-center gap-2"><span className="text-sm font-medium text-[#f5f5f5]">{p.name}</span><span className="text-[10px] text-[#a0a0a6] bg-white/[0.06] px-1.5 py-0.5 rounded">{p.region}</span></span>
+            <span className="block text-xs text-[#a0a0a6] mt-0.5">{p.configured ? DESCRIPTIONS[p.slug] : 'Bientôt disponible'}</span>
+          </span>
+          {p.configured && <Plus size={17} className="text-[#f4be7e] shrink-0" />}
+        </button>
+      ))}
+      <p className="text-xs text-[#8e8e98] pt-2 flex items-center gap-1.5 justify-center"><Lock size={12} />Accès en lecture seule. Vous pouvez le retirer à tout moment.</p>
+    </div>
+  );
+}
+
+const STATUS = {
+  active: { label: 'Actif', variant: 'success' as const, icon: CheckCircle2 },
+  error: { label: 'Erreur', variant: 'danger' as const, icon: AlertCircle },
+  pending: { label: 'En attente', variant: 'warning' as const, icon: Clock },
+};
+
+function ConnectionCard({ connection, name }: { connection: Connection; name: string }) {
+  const [confirm, setConfirm] = useState(false);
+  const status = STATUS[connection.status as keyof typeof STATUS] ?? STATUS.pending;
+  const sync = useAction(() => api(`/api/connections/${connection.id}/sync`, { method: 'POST' }), { success: `${name} synchronisé` });
+  const remove = useAction(() => api(`/api/connections/${connection.id}`, { method: 'DELETE' }), { success: `${name} déconnecté`, onSuccess: () => setConfirm(false) });
+  const n = connection._count.financialAccounts;
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="w-10 h-10 bg-[#f4be7e]/10 rounded-[12px] flex items-center justify-center shrink-0"><Link2 size={19} className="text-[#f4be7e]" /></span>
+          <span className="min-w-0"><span className="block font-medium text-[#f5f5f5] text-sm truncate">{name}</span><span className="block text-xs text-[#8e8e98]">{n} compte{n > 1 ? 's' : ''} · dernière sync : {formatRelativeTime(connection.lastSyncAt).toLowerCase()}</span></span>
+        </div>
+        <Badge variant={status.variant}><status.icon size={12} className="mr-1" />{status.label}</Badge>
+      </div>
+      {connection.lastSyncError && <p role="alert" className="text-xs text-[#f87171] mb-3">{connection.lastSyncError}</p>}
+      <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
+        <Button variant="ghost" size="sm" loading={sync.isPending} onClick={() => sync.mutate()}><RefreshCw size={14} className="mr-1.5" />Synchroniser</Button>
+        <Button variant="ghost" size="sm" onClick={() => setConfirm(true)} className="hover:text-[#f87171]"><Trash2 size={14} className="mr-1.5" />Déconnecter</Button>
+      </div>
+      <ConfirmDialog isOpen={confirm} onClose={() => setConfirm(false)} title={`Déconnecter ${name} ?`} text={`L'accès sera retiré. ${n} compte${n > 1 ? 's' : ''} et leurs données quitteront votre patrimoine.`} confirmLabel="Déconnecter" loading={remove.isPending} onConfirm={() => remove.mutate()} />
+    </Card>
+  );
+}
 
 export default function ConnectionsPage() {
-  const { data: connections, refetch } = useConnections();
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [syncing, setSyncing] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
-
-  const connList = connections ?? [];
-
-  async function handleConnect(provider: string) {
-    try {
-      const res = await fetch('/api/connections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider,
-          callbackUrl: `${window.location.origin}/dashboard/connections`,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
-      } else {
-        setShowAddModal(false);
-        refetch();
-        toast('Connexion initiée', 'success');
-      }
-    } catch (error) {
-      console.error('Connection error:', error);
-      toast('Erreur lors de la connexion', 'error');
-    }
-  }
-
-  async function handleSync(connectionId: string) {
-    setSyncing(connectionId);
-    try {
-      await fetch(`/api/connections/${connectionId}/sync`, {
-        method: 'POST',
-      });
-      refetch();
-      toast('Synchronisation terminée', 'success');
-    } catch (error) {
-      console.error('Sync error:', error);
-      toast('Erreur de synchronisation', 'error');
-    } finally {
-      setSyncing(null);
-    }
-  }
-
-  async function handleDelete(connectionId: string) {
-    setDeleting(connectionId);
-    try {
-      await fetch(`/api/connections/${connectionId}`, {
-        method: 'DELETE',
-      });
-      refetch();
-      toast('Provider déconnecté', 'info');
-    } catch (error) {
-      console.error('Delete error:', error);
-      toast('Erreur lors de la déconnexion', 'error');
-    } finally {
-      setDeleting(null);
-    }
-  }
-
+  const query = useConnections();
+  const [adding, setAdding] = useState(false);
+  const add = <Button onClick={() => setAdding(true)}><Plus size={16} className="mr-1.5" />Connecter</Button>;
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between animate-in">
-        <div>
-          <h1 className="text-2xl font-bold text-[#f5f5f5]">Connexions</h1>
-          <p className="text-[#a0a0a6] text-sm mt-1">
-            {connList.length} provider{connList.length !== 1 ? 's' : ''} connecté{connList.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-        <Button onClick={() => setShowAddModal(true)}>
-          <Plus size={16} className="mr-2" />
-          Ajouter un provider
-        </Button>
-      </div>
-
-      {connList.length === 0 ? (
-        <Card className="animate-in animate-in-1">
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-16 h-16 bg-[rgba(255,255,255,0.04)] rounded-[16px] flex items-center justify-center mb-4">
-              <Link2 size={32} className="text-[#6b6b73]" />
-            </div>
-            <h2 className="text-lg font-medium text-[#f5f5f5] mb-2">
-              Aucun provider connecté
-            </h2>
-            <p className="text-sm text-[#6b6b73] max-w-md mb-6">
-              Connectez vos comptes bancaires, courtiers et plateformes crypto pour synchroniser
-              automatiquement vos données financières.
-            </p>
-            <Button onClick={() => setShowAddModal(true)}>
-              <Plus size={16} className="mr-2" />
-              Connecter un provider
-            </Button>
-          </div>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {connList.map((conn, i) => {
-            const info = providerInfo[conn.provider];
-            const status = statusConfig[conn.status] || statusConfig.pending;
-            const StatusIcon = status.icon;
-            const isSyncing = syncing === conn.id;
-            const isDeleting = deleting === conn.id;
-
-            return (
-              <Card
-                key={conn.id}
-                className={`animate-in animate-in-${Math.min(i + 1, 8)}`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#f4be7e]/10 rounded-[12px] flex items-center justify-center">
-                      <Link2 size={20} className="text-[#f4be7e]" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-[#f5f5f5] text-sm">
-                        {info?.name || conn.provider}
-                      </h3>
-                      <p className="text-xs text-[#6b6b73]">
-                        {info?.region || 'Global'}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant={status.variant}>
-                    <StatusIcon size={12} className="mr-1" />
-                    {status.label}
-                  </Badge>
-                </div>
-
-                {conn.lastSyncAt && (
-                  <p className="text-xs text-[#6b6b73] mb-3">
-                    Dernière sync : {formatRelativeTime(conn.lastSyncAt)}
-                  </p>
-                )}
-
-                {conn.lastSyncError && (
-                  <p className="text-xs text-[#f87171] mb-3">
-                    {conn.lastSyncError}
-                  </p>
-                )}
-
-                <div className="flex items-center gap-2 pt-3 border-t border-[rgba(255,255,255,0.04)]">
-                  <button
-                    onClick={() => handleSync(conn.id)}
-                    disabled={isSyncing}
-                    className="flex items-center gap-1.5 text-xs text-[#6b6b73] hover:text-[#f4be7e] transition-colors disabled:opacity-50"
-                  >
-                    <RefreshCw size={12} className={isSyncing ? 'animate-spin' : ''} />
-                    {isSyncing ? 'Sync...' : 'Synchroniser'}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(conn.id)}
-                    disabled={isDeleting}
-                    className="flex items-center gap-1.5 text-xs text-[#6b6b73] hover:text-[#f87171] transition-colors disabled:opacity-50 ml-auto"
-                  >
-                    <Trash2 size={12} />
-                    {isDeleting ? 'Suppression...' : 'Déconnecter'}
-                  </button>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      <Modal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        title="Connecter un provider"
-      >
-        <div className="space-y-3">
-          {Object.entries(providerInfo).map(([slug, info]) => {
-            const alreadyConnected = connList.some((c) => c.provider === slug);
-            return (
-              <button
-                key={slug}
-                className="w-full flex items-center justify-between p-3 bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.06)] rounded-[12px] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => handleConnect(slug)}
-                disabled={alreadyConnected}
-              >
-                <div className="text-left">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-[#f5f5f5]">
-                      {info.name}
-                    </span>
-                    <span className="text-[10px] text-[#6b6b73] bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 rounded">
-                      {info.region}
-                    </span>
-                  </div>
-                  <div className="text-xs text-[#6b6b73] mt-0.5">
-                    {info.description}
-                  </div>
-                  {alreadyConnected && (
-                    <div className="text-xs text-[#34d399] mt-1">Déjà connecté</div>
-                  )}
-                </div>
-                {!alreadyConnected && (
-                  <ExternalLink size={16} className="text-[#6b6b73] shrink-0" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-        <p className="text-xs text-[#6b6b73] mt-4 text-center">
-          Connexion sécurisée en lecture seule via OAuth
-        </p>
-      </Modal>
+    <div className="space-y-5">
+      <PageHeader title="Connexions" subtitle="Vos banques et plateformes, synchronisées automatiquement" action={add} />
+      <Loader query={query}>
+        {({ connections, providers }) => (
+          <>
+            <Suspense><ConnectResult providers={providers} /></Suspense>
+            {connections.length === 0 ? (
+              <Card><EmptyState icon={<Link2 size={26} />} title="Aucune connexion" text="Reliez une banque ou une plateforme : soldes, positions et opérations se mettent à jour tout seuls." action={add} /></Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {connections.map((c) => <ConnectionCard key={c.id} connection={c} name={providers.find((p) => p.slug === c.provider)?.name ?? c.provider} />)}
+              </div>
+            )}
+            <Modal isOpen={adding} onClose={() => setAdding(false)} title="Connecter un compte"><ProviderPicker providers={providers} onClose={() => setAdding(false)} /></Modal>
+          </>
+        )}
+      </Loader>
     </div>
   );
 }

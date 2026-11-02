@@ -1,62 +1,43 @@
 import { BaseConnector } from '../base';
-import { registerConnector } from '../registry';
-import type {
-  ProviderSlug,
-  ConnectionInitResult,
-  CallbackResult,
-  SyncResult,
-} from '../types';
+import { withQuery } from '../signing';
+import type { CallbackResult, ConnectionInitResult, ProviderSlug, SyncCredentials, SyncResult } from '../types';
 import { normalizePowensData } from './normalizer';
-import { verifyPowensWebhook } from './webhooks';
-
-interface PowensTokenResponse {
-  access_token: string;
-  token_type: string;
-}
-
-interface PowensUserResponse {
-  id: number;
-  signin: string;
-}
 
 interface PowensAccount {
   id: number;
-  id_connection: number;
-  name: string;
-  balance: number;
-  currency: { id: string };
-  type: string;
-  last_update: string;
-  iban?: string;
-  number?: string;
-  company_name?: string;
+  id_connection?: number;
+  name?: string | null;
+  original_name?: string | null;
+  balance?: number | null;
+  currency?: { id: string } | null;
+  type?: string | null;
+  company_name?: string | null;
+  loan?: { total_amount?: number | null } | null;
 }
 
 interface PowensInvestment {
   id: number;
   id_account: number;
   label: string;
-  code: string;
-  code_type: string;
-  quantity: number;
-  unitprice: number;
-  unitvalue: number;
-  valuation: number;
-  diff: number;
-  diff_percent: number;
-  portfolio_share: number;
+  code?: string | null;
+  code_type?: string | null;
+  stock_symbol?: string | null;
+  quantity?: number | null;
+  unitprice?: number | null;
+  unitvalue?: number | null;
+  prev_diff_percent?: number | null;
+  details?: { asset_category?: string | null } | null;
 }
 
 interface PowensTransaction {
   id: number;
   id_account: number;
   date: string;
-  rdate: string;
+  rdate?: string | null;
   value: number;
-  type: string;
-  original_wording: string;
-  simplified_wording: string;
-  category?: { name: string };
+  type?: string | null;
+  original_wording?: string | null;
+  simplified_wording?: string | null;
 }
 
 export interface PowensRawData {
@@ -65,138 +46,90 @@ export interface PowensRawData {
   transactions: PowensTransaction[];
 }
 
-const POWENS_DOMAIN = process.env.POWENS_DOMAIN || 'mstech-sandbox.biapi.pro';
-const POWENS_CLIENT_ID = process.env.POWENS_CLIENT_ID || '';
-const POWENS_CLIENT_SECRET = process.env.POWENS_CLIENT_SECRET || '';
-
+/**
+ * Docs: https://docs.powens.com/api-reference/overview/webview and
+ * https://docs.powens.com/api-reference/overview/authentication
+ *
+ * We open the webview WITHOUT a `code`: Powens creates the user and returns a
+ * `code` with `connection_id` on the callback, exchanged for a permanent token at
+ * POST /auth/token/access. So each connection is its own Powens user, whose
+ * permanent token is what we encrypt and store.
+ * VERIFY: redirect_uri must be on the allow-list in the Powens console.
+ */
 class PowensConnector extends BaseConnector {
   readonly slug: ProviderSlug = 'powens';
-  readonly displayName = 'Powens (Budget Insight)';
-  readonly region = 'France / EU';
+  readonly displayName = 'Powens (banques, PEA, assurance-vie)';
+  readonly region = 'France / Europe';
+
+  private get domain() {
+    // Accepts "example" or "example.biapi.pro".
+    const d = process.env.POWENS_DOMAIN ?? '';
+    return d && !d.includes('.') ? `${d}.biapi.pro` : d;
+  }
 
   private get baseUrl() {
-    return `https://${POWENS_DOMAIN}/2.0`;
+    return `https://${this.domain}/2.0`;
   }
 
-  private async getClientToken(): Promise<string> {
-    const data = await this.fetchJson<PowensTokenResponse>(
-      `${this.baseUrl}/auth/init`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          client_id: POWENS_CLIENT_ID,
-          client_secret: POWENS_CLIENT_SECRET,
-        }),
-      }
-    );
-    return data.access_token;
+  isConfigured() {
+    return !!(this.domain && process.env.POWENS_CLIENT_ID && process.env.POWENS_CLIENT_SECRET);
   }
 
-  async initiateConnection(
-    _userId: string,
-    callbackUrl: string
-  ): Promise<ConnectionInitResult> {
-    const token = await this.getClientToken();
-
-    // Create a temporary user in Powens sandbox
-    const user = await this.fetchJson<PowensUserResponse>(
-      `${this.baseUrl}/auth/init`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          client_id: POWENS_CLIENT_ID,
-          client_secret: POWENS_CLIENT_SECRET,
-        }),
-      }
-    );
-
-    const redirectUrl = `https://${POWENS_DOMAIN}/auth/webview/connect?client_id=${POWENS_CLIENT_ID}&redirect_uri=${encodeURIComponent(callbackUrl)}&token=${token}`;
-
+  async initiateConnection(_userId: string, callbackUrl: string, state: string): Promise<ConnectionInitResult> {
     return {
       type: 'redirect',
-      redirectUrl,
-      connectionId: String(user.id),
+      redirectUrl: withQuery('https://webview.powens.com/fr/connect', {
+        domain: this.domain,
+        client_id: process.env.POWENS_CLIENT_ID ?? '',
+        redirect_uri: callbackUrl,
+        state,
+      }),
     };
   }
 
-  async handleCallback(
-    params: Record<string, string>
-  ): Promise<CallbackResult> {
-    const { code, connection_id } = params;
-
-    if (!code) {
-      throw new Error('Missing authorization code from Powens callback');
-    }
-
-    const tokenData = await this.fetchJson<PowensTokenResponse>(
-      `${this.baseUrl}/auth/token/access`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          client_id: POWENS_CLIENT_ID,
-          client_secret: POWENS_CLIENT_SECRET,
-          code,
-        }),
-      }
-    );
-
-    return {
-      externalId: connection_id || '',
-      accessToken: tokenData.access_token,
-    };
+  async handleCallback(params: Record<string, string>): Promise<CallbackResult> {
+    if (!params.code) throw new Error('Powens n\'a pas renvoyé de code d\'autorisation.');
+    const token = await this.fetchJson<{ access_token: string }>(`${this.baseUrl}/auth/token/access`, {
+      method: 'POST',
+      body: JSON.stringify({
+        client_id: process.env.POWENS_CLIENT_ID,
+        client_secret: process.env.POWENS_CLIENT_SECRET,
+        code: params.code,
+      }),
+    });
+    return { externalId: params.connection_id ?? '', accessToken: token.access_token };
   }
 
-  async sync(accessToken: string): Promise<SyncResult> {
+  async sync({ accessToken }: SyncCredentials): Promise<SyncResult> {
     const headers = { Authorization: `Bearer ${accessToken}` };
-
-    const [accountsRes, investmentsRes, transactionsRes] = await Promise.all([
-      this.fetchJson<{ accounts: PowensAccount[] }>(
-        `${this.baseUrl}/users/me/accounts`,
-        { headers }
-      ),
-      this.fetchJson<{ investments: PowensInvestment[] }>(
-        `${this.baseUrl}/users/me/investments`,
-        { headers }
-      ).catch(() => ({ investments: [] as PowensInvestment[] })),
-      this.fetchJson<{ transactions: PowensTransaction[] }>(
-        `${this.baseUrl}/users/me/transactions?limit=500`,
-        { headers }
-      ).catch(() => ({ transactions: [] as PowensTransaction[] })),
+    // Accounts decide whether the sync worked. Investments and transactions depend on
+    // the products enabled on the Powens contract, so only their "not in plan" answer is tolerated.
+    const accounts = await this.fetchJson<{ accounts: PowensAccount[] }>(`${this.baseUrl}/users/me/accounts`, { headers });
+    const [investments, transactions] = await Promise.all([
+      this.optional<{ investments: PowensInvestment[] }>(`${this.baseUrl}/users/me/investments`, headers, { investments: [] }),
+      this.optional<{ transactions: PowensTransaction[] }>(`${this.baseUrl}/users/me/transactions?limit=500`, headers, { transactions: [] }),
     ]);
-
-    const rawData: PowensRawData = {
-      accounts: accountsRes.accounts || [],
-      investments: investmentsRes.investments || [],
-      transactions: transactionsRes.transactions || [],
-    };
-
-    return normalizePowensData(rawData);
+    return normalizePowensData({
+      accounts: accounts.accounts ?? [],
+      investments: investments.investments ?? [],
+      transactions: transactions.transactions ?? [],
+    });
   }
 
-  async refreshCredentials(
-    refreshToken: string
-  ): Promise<{ accessToken: string; refreshToken?: string; expiresAt?: Date }> {
-    const data = await this.fetchJson<PowensTokenResponse>(
-      `${this.baseUrl}/auth/token/access`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          client_id: POWENS_CLIENT_ID,
-          client_secret: POWENS_CLIENT_SECRET,
-          grant_type: 'refresh_token',
-          refresh_token: refreshToken,
-        }),
-      }
-    );
-
-    return { accessToken: data.access_token };
+  private async optional<T>(url: string, headers: Record<string, string>, empty: T): Promise<T> {
+    try {
+      return await this.fetchJson<T>(url, { headers });
+    } catch (error) {
+      if (error instanceof Error && /\((403|404)\)/.test(error.message)) return empty;
+      throw error;
+    }
   }
 
-  verifyWebhook(body: string, signature: string): boolean {
-    return verifyPowensWebhook(body, signature);
+  async refreshCredentials(refreshToken: string) {
+    // Powens user tokens are permanent: nothing to refresh.
+    return { accessToken: refreshToken };
   }
 }
 
 const powens = new PowensConnector();
-registerConnector('powens', () => powens);
 export default powens;

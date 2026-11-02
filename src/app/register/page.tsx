@@ -1,126 +1,55 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { FormEvent, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { FormError } from '@/components/ui/kit';
+import DemoButton from '@/components/DemoButton';
+import { api } from '@/lib/api';
+import { AuthShell, LegalNotice } from '../_auth/AuthShell';
+import PasswordInput from '../_auth/PasswordInput';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
-    if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.');
-      return;
-    }
+    setError(null);
+    if (password.length < 8) return setError('Le mot de passe doit contenir au moins 8 caractères.');
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Erreur lors de l'inscription.");
+      await api('/api/auth/register', { method: 'POST', body: { name, email, password } });
+      const result = await signIn('credentials', { email, password, redirect: false });
+      if (!result || result.error) {
+        setError('Votre compte est créé, mais la connexion a échoué. Connectez-vous depuis la page de connexion.');
+        setLoading(false);
         return;
       }
-      // Auto sign-in after registration
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-      if (result?.error) {
-        setError("Compte créé mais erreur de connexion. Essayez de vous connecter.");
-      } else {
-        router.push('/dashboard');
-        router.refresh();
-      }
-    } catch {
-      setError("Erreur lors de l'inscription. Veuillez réessayer.");
-    } finally {
+      window.location.href = '/dashboard';
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Inscription impossible. Réessayez.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative">
-      {/* Ambient glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(244,190,126,0.06)_0%,transparent_70%)] pointer-events-none" />
-
-      <div className="w-full max-w-md relative">
-        <div className="text-center mb-8 animate-in">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-gradient-to-br from-[#d4a06a] via-[#f4be7e] to-[#f9d09f] shadow-[0_0_20px_rgba(244,190,126,0.3)]">
-              <span className="text-[#0a0a0b] font-bold">MS</span>
-            </div>
-            <span className="text-xl font-bold text-[#f5f5f5]">MS Tech</span>
-          </Link>
-          <h1 className="text-2xl font-bold text-[#f5f5f5]">Créer un compte</h1>
-          <p className="text-[#a0a0a6] mt-2">Commencez à piloter votre patrimoine</p>
-        </div>
-
-        <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] rounded-[20px] p-6 backdrop-blur-[12px] animate-in animate-in-1">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="bg-[#f87171]/8 border border-[#f87171]/15 rounded-[12px] p-3">
-                <p className="text-sm text-[#f87171]">{error}</p>
-              </div>
-            )}
-            <Input
-              id="name"
-              label="Nom complet"
-              type="text"
-              placeholder="Alexandre Dupont"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <Input
-              id="email"
-              label="Email"
-              type="email"
-              placeholder="votre@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              id="password"
-              label="Mot de passe"
-              type="password"
-              placeholder="Minimum 8 caractères"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <Button type="submit" loading={loading} className="w-full">
-              Créer mon compte
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center text-sm text-[#a0a0a6]">
-            Déjà un compte ?{' '}
-            <Link href="/login" className="text-[#f4be7e] hover:text-[#f9d09f] font-medium transition-colors">
-              Se connecter
-            </Link>
-          </div>
-        </div>
-
-        <p className="text-center text-xs text-[#6b6b73] mt-6 animate-in animate-in-2">
-          En créant un compte, vous acceptez nos CGU et notre politique de confidentialité.
-        </p>
-      </div>
-    </div>
+    <AuthShell title="Créer un compte" subtitle="Commencez à piloter votre patrimoine" footer={<LegalNotice action="créant un compte" />}>
+      <form onSubmit={submit} className="space-y-4">
+        <FormError message={error} />
+        <Input id="name" label="Nom" placeholder="Votre nom" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required />
+        <Input id="email" label="Email" type="email" placeholder="vous@exemple.fr" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" autoCapitalize="none" required />
+        <PasswordInput id="password" label="Mot de passe" placeholder="8 caractères minimum" value={password} onChange={setPassword} autoComplete="new-password" />
+        <Button type="submit" loading={loading} className="w-full">Créer mon compte</Button>
+      </form>
+      <div className="flex items-center gap-3 my-4 text-xs text-[#8e8e98]"><span className="h-px flex-1 bg-white/[0.08]" />ou<span className="h-px flex-1 bg-white/[0.08]" /></div>
+      <DemoButton variant="secondary" className="block" label="Essayer la démo" />
+      <p className="mt-5 text-center text-sm text-[#a0a0a6]">Déjà un compte ? <Link href="/login" className="text-[#f4be7e] hover:text-[#f9d09f] font-medium">Se connecter</Link></p>
+    </AuthShell>
   );
 }

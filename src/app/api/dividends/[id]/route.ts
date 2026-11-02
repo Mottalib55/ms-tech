@@ -1,0 +1,10 @@
+import { prisma } from '@/server/db';
+import { notFound, requireUser, route } from '@/server/http';
+
+export const DELETE = route(async (_req: Request, { params }: { params: Promise<{ id: string }> }) => {
+  const user = await requireUser();
+  const { id } = await params;
+  const { count } = await prisma.dividend.deleteMany({ where: { id, holding: { account: { userId: user.id } } } });
+  if (!count) throw notFound('Dividende');
+  return { success: true };
+});

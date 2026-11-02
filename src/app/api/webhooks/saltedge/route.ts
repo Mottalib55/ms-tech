@@ -1,45 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/server/db';
-import { getConnector } from '@/connectors/registry';
-import { decrypt } from '@/server/encryption';
-import { persistSyncResult } from '@/server/sync';
-import { parseSaltEdgeWebhook } from '@/connectors/saltedge/webhooks';
-import type { ProviderSlug } from '@/connectors/types';
+import { syncConnection } from '@/server/sync';
+import { parseSaltEdgeWebhook, verifySaltEdgeWebhook } from '@/connectors/saltedge/webhooks';
 
 export async function POST(req: NextRequest) {
+  const body = await req.text();
+  // Signed over the callback URL as declared in Salt Edge's dashboard.
+  const callbackUrl = `${(process.env.NEXTAUTH_URL ?? '').replace(/\/$/, '')}${req.nextUrl.pathname}`;
+  if (!verifySaltEdgeWebhook(body, req.headers.get('signature') ?? '', callbackUrl)) {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+
   try {
-    const body = await req.text();
-    const signature = req.headers.get('signature') || '';
+    const { data } = parseSaltEdgeWebhook(body);
+    const connection = data.connection_id
+      ? await prisma.providerConnection.findFirst({ where: { provider: 'saltedge', externalId: data.connection_id } })
+      : null;
+    if (!connection) return NextResponse.json({ received: true });
 
-    const connector = getConnector('saltedge' as ProviderSlug);
-    if (!connector.verifyWebhook(body, signature)) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    // VERIFY: the exact terminal `stage` value on the first real callback (the docs show both).
+    if (data.error_class) {
+      await prisma.providerConnection.update({
+        where: { id: connection.id },
+        data: { status: 'error', lastSyncError: 'La banque a signalé une erreur. Reconnectez le compte.' },
+      });
+    } else if (data.stage === 'finish' || data.stage === 'success') {
+      await syncConnection(connection.id).catch((e) => console.error('[saltedge] webhook sync', e));
     }
-
-    const payload = parseSaltEdgeWebhook(body);
-    const connectionId = payload.data.connection_id;
-
-    const connection = await prisma.providerConnection.findFirst({
-      where: { provider: 'saltedge', externalId: connectionId },
-    });
-
-    if (!connection?.accessTokenEnc) {
-      return NextResponse.json({ received: true });
-    }
-
-    if (payload.data.stage === 'finish') {
-      try {
-        const accessToken = await decrypt(connection.accessTokenEnc);
-        const syncResult = await connector.sync(accessToken);
-        await persistSyncResult(connection.id, connection.userId, syncResult);
-      } catch (syncError) {
-        console.error('Salt Edge webhook sync failed:', syncError);
-      }
-    }
-
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Salt Edge webhook error:', error);
+    console.error('[saltedge] webhook', error);
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }

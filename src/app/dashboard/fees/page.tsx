@@ -1,169 +1,160 @@
 'use client';
 
-import { AlertTriangle, TrendingDown, Lightbulb } from 'lucide-react';
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import { AlertTriangle, Lightbulb, Plus, Receipt, Trash2, TrendingDown } from 'lucide-react';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import Card, { CardHeader, CardTitle } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import AnimatedNumber from '@/components/ui/AnimatedNumber';
-import { useFees } from '@/hooks/useFees';
-import { formatCurrency, formatCurrencyDetailed } from '@/lib/utils';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Modal from '@/components/ui/Modal';
+import { ConfirmDialog, EmptyState, Loader, PageHeader, StatCard } from '@/components/ui/kit';
+import { CHART_ANIM, ChartOrTable, Legend, axisTick, gridStroke, tooltipProps } from '@/components/charts/kit';
+import FeeForm, { FEE_TYPES } from '@/components/forms/FeeForm';
+import { toNumber } from '@/components/forms/numbers';
+import { useAccounts, useAction, useFees, useSummary } from '@/hooks/data';
+import { api } from '@/lib/api';
+import { annualizedFee, feeSavings } from '@/lib/finance';
+import { formatCompact, formatCurrency, formatCurrencyDetailed } from '@/lib/utils';
+import type { Fee } from '@/types';
 
-const feeTypeLabels: Record<string, string> = {
-  management: 'Gestion',
-  transaction: 'Transaction',
-  custody: 'Garde',
-  exchange: 'Change',
-  performance: 'Performance',
-};
+const FREQUENCY: Record<string, string> = { annual: 'par an', monthly: 'par mois', quarterly: 'par trimestre', 'per-transaction': 'estimation annuelle' };
+const SERIES = [
+  { key: 'none', name: 'Sans frais', color: '#149b72' },
+  { key: 'optimized', name: 'Frais optimisés', color: '#5b86f0' },
+  { key: 'current', name: 'Frais actuels', color: '#d95f20' },
+] as const;
 
-const tooltipStyle = {
-  backgroundColor: 'rgba(20,20,22,0.92)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: '12px',
-};
+const annual = (f: Fee) => annualizedFee(f.amount, f.frequency);
+const percent = (n: number) => `${n.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`;
 
-function generateImpactData(fees: { amount: number; percentage: number; alternativeFee?: number }[]) {
-  const totalAnnualFees = fees.reduce((s, f) => s + f.amount, 0);
-  const capital = 396271;
-  const rate = 0.07;
-  const data = [];
-  let withFees = capital;
-  let withoutFees = capital;
-  let optimized = capital;
-  const optimizedFees = fees.reduce((s, f) => s + (f.alternativeFee !== undefined ? (f.amount * (f.alternativeFee / f.percentage)) : f.amount), 0);
-
+function project(capital: number, annualFees: number, optimizedFees: number, ratePct: number) {
+  const r = ratePct / 100;
+  let current = capital; let optimized = capital; let none = capital;
+  const rows = [];
   for (let year = 0; year <= 30; year++) {
-    data.push({
-      year: `${year} ans`,
-      'Avec frais actuels': Math.round(withFees),
-      'Sans frais': Math.round(withoutFees),
-      'Frais optimisés': Math.round(optimized),
-    });
-    withFees = withFees * (1 + rate) - totalAnnualFees;
-    withoutFees = withoutFees * (1 + rate);
-    optimized = optimized * (1 + rate) - optimizedFees;
+    rows.push({ year, current: Math.round(current), optimized: Math.round(optimized), none: Math.round(none) });
+    current = Math.max(0, current * (1 + r) - annualFees);
+    optimized = Math.max(0, optimized * (1 + r) - optimizedFees);
+    none *= 1 + r;
   }
-  return data;
+  return rows;
+}
+
+function Impact({ fees, capital, currency }: { fees: Fee[]; capital: number; currency: string }) {
+  const [rateText, setRateText] = useState('7');
+  const rate = toNumber(rateText, 30);
+  const total = fees.reduce((s, f) => s + annual(f), 0);
+  const savings = fees.reduce((s, f) => s + feeSavings(annual(f), f.percentage, f.alternativeFee), 0);
+  const data = useMemo(() => project(capital, total, total - savings, rate), [capital, total, savings, rate]);
+  const y20 = data[20];
+  return (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <StatCard label="Frais annuels" value={<span data-testid="fees-total">{formatCurrencyDetailed(total, currency)}</span>} icon={<AlertTriangle size={17} className="text-[#f87171]" />} />
+        <StatCard label="Économies possibles" value={`${formatCurrencyDetailed(savings, currency)}/an`} tone={savings > 0 ? 'positive' : undefined} icon={<Lightbulb size={17} className="text-[#f4be7e]" />} />
+        <StatCard label="Coût sur 20 ans" value={formatCurrency(y20.none - y20.current, currency)} tone="negative" icon={<TrendingDown size={17} className="text-[#a78bfa]" />} hint={`Rendement supposé : ${percent(rate)}`} />
+      </div>
+      <Card className="min-w-0">
+        <CardHeader className="flex-wrap gap-3 items-end">
+          <div className="min-w-0"><CardTitle>Impact sur 30 ans</CardTitle><p className="text-xs text-[#8e8e98] mt-0.5">Depuis vos {formatCurrency(capital, currency)} d&apos;actifs, frais supposés constants, sans nouveau versement.</p></div>
+          <div className="w-36"><Input id="fees-rate" label="Rendement annuel (%)" inputMode="decimal" value={rateText} onChange={(e) => setRateText(e.target.value)} autoComplete="off" /></div>
+        </CardHeader>
+        <ChartOrTable
+          label="impact des frais"
+          chart={
+            <div>
+              <div role="img" aria-label={`Sur 30 ans : ${SERIES.map((s) => `${s.name} ${formatCurrency(data[30][s.key], currency)}`).join(', ')}`}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
+                    <CartesianGrid vertical={false} stroke={gridStroke} />
+                    <XAxis dataKey="year" tick={axisTick} axisLine={false} tickLine={false} minTickGap={32} tickFormatter={(y) => `${y} ans`} />
+                    <YAxis tick={axisTick} axisLine={false} tickLine={false} width={56} tickFormatter={(v) => formatCompact(v, currency)} />
+                    <Tooltip {...tooltipProps} labelFormatter={(y) => `Dans ${y} ans`} formatter={(v, n) => [formatCurrency(Number(v), currency), String(n)]} />
+                    {SERIES.map((s) => <Line key={s.key} type="monotone" dataKey={s.key} name={s.name} stroke={s.color} strokeWidth={2} dot={false} {...CHART_ANIM} />)}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <Legend items={SERIES.map((s) => ({ name: s.name, color: s.color }))} />
+            </div>
+          }
+          table={
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm"><thead><tr className="text-left text-xs text-[#8e8e98]"><th className="pb-2 font-medium">Horizon</th>{SERIES.map((s) => <th key={s.key} className="pb-2 font-medium text-right">{s.name}</th>)}</tr></thead>
+                <tbody>{data.filter((d) => d.year % 5 === 0).map((d) => <tr key={d.year} className="border-t border-white/[0.05] tabular-nums text-[#f5f5f5]"><td className="py-2 text-[#a0a0a6]">{d.year} ans</td>{SERIES.map((s) => <td key={s.key} className="py-2 text-right">{formatCurrency(d[s.key], currency)}</td>)}</tr>)}</tbody>
+              </table>
+            </div>
+          }
+        />
+      </Card>
+    </>
+  );
 }
 
 export default function FeesPage() {
-  const { data: fees } = useFees();
-  const feesList = fees ?? [];
-
-  const impactData = generateImpactData(feesList);
-  const totalAnnualFees = feesList.reduce((s, f) => s + f.amount, 0);
-  const potentialSavings = feesList
-    .filter((f) => f.alternativeFee !== undefined)
-    .reduce((s, f) => s + (f.amount - (f.amount * (f.alternativeFee! / f.percentage))), 0);
+  const fees = useFees();
+  const summary = useSummary();
+  const accounts = useAccounts();
+  const currency = summary.data?.currency ?? 'EUR';
+  const eligible = (accounts.data ?? []).filter((a) => a.type !== 'loan');
+  const [adding, setAdding] = useState(false);
+  const [deleting, setDeleting] = useState<Fee | null>(null);
+  const remove = useAction((id: string) => api(`/api/fees/${id}`, { method: 'DELETE' }), { success: 'Frais supprimés', onSuccess: () => setDeleting(null) });
+  const add = <Button onClick={() => setAdding(true)}><Plus size={16} className="mr-1.5" />Ajouter</Button>;
 
   return (
-    <div className="space-y-6">
-      <div className="animate-in">
-        <h1 className="text-2xl font-bold text-[#f5f5f5]">Scanner de frais</h1>
-        <p className="text-[#a0a0a6] text-sm mt-1">Détectez et optimisez vos frais bancaires et de courtage</p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="animate-in animate-in-1">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#f87171]/10 rounded-[12px] flex items-center justify-center">
-              <AlertTriangle size={20} className="text-[#f87171]" />
-            </div>
-            <div>
-              <p className="text-sm text-[#a0a0a6]">Frais annuels totaux</p>
-              <p className="text-xl font-bold text-[#f5f5f5]">
-                <AnimatedNumber value={totalAnnualFees} format={(n) => formatCurrencyDetailed(n)} />
-              </p>
-            </div>
-          </div>
-        </Card>
-        <Card className="animate-in animate-in-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#f4be7e]/10 rounded-[12px] flex items-center justify-center">
-              <Lightbulb size={20} className="text-[#f4be7e]" />
-            </div>
-            <div>
-              <p className="text-sm text-[#a0a0a6]">Économies possibles</p>
-              <p className="text-xl font-bold text-[#34d399]">
-                <AnimatedNumber value={potentialSavings} format={(n) => `${formatCurrencyDetailed(n)}/an`} delay={200} />
-              </p>
-            </div>
-          </div>
-        </Card>
-        <Card className="animate-in animate-in-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#a78bfa]/10 rounded-[12px] flex items-center justify-center">
-              <TrendingDown size={20} className="text-[#a78bfa]" />
-            </div>
-            <div>
-              <p className="text-sm text-[#a0a0a6]">Impact sur 20 ans</p>
-              <p className="text-xl font-bold text-[#f87171]">
-                -{formatCurrency(impactData[20] ? impactData[20]['Sans frais'] - impactData[20]['Avec frais actuels'] : 0)}
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <Card className="animate-in animate-in-4">
-        <CardHeader>
-          <CardTitle>Impact des frais sur le long terme</CardTitle>
-        </CardHeader>
-        <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={impactData}>
-            <XAxis dataKey="year" tick={{ fill: '#6b6b73', fontSize: 11 }} axisLine={false} tickLine={false} interval={4} />
-            <YAxis tick={{ fill: '#6b6b73', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} width={50} />
-            <Tooltip
-              contentStyle={tooltipStyle}
-              formatter={(value) => [formatCurrency(Number(value)), '']}
-            />
-            <Legend />
-            <Area type="monotone" dataKey="Sans frais" fill="#f4be7e" fillOpacity={0.1} stroke="#f4be7e" strokeWidth={2} />
-            <Area type="monotone" dataKey="Frais optimisés" fill="#5682f2" fillOpacity={0.1} stroke="#5682f2" strokeWidth={2} />
-            <Area type="monotone" dataKey="Avec frais actuels" fill="#f87171" fillOpacity={0.1} stroke="#f87171" strokeWidth={2} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </Card>
-
-      <Card className="animate-in animate-in-5">
-        <CardHeader>
-          <CardTitle>Détail des frais</CardTitle>
-        </CardHeader>
-        <div className="space-y-4">
-          {feesList.map((fee) => (
-            <div key={fee.id} className="p-4 bg-[rgba(255,255,255,0.03)] rounded-[12px] border border-[rgba(255,255,255,0.04)]">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-[#f5f5f5] text-sm">{fee.label}</h3>
-                    <Badge>{feeTypeLabels[fee.type]}</Badge>
-                  </div>
-                  <p className="text-xs text-[#6b6b73] mt-0.5">{fee.accountName}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-[#f5f5f5]">{formatCurrencyDetailed(fee.amount)}</p>
-                  <p className="text-xs text-[#6b6b73]">{fee.percentage}% &middot; {fee.frequency === 'annual' ? 'Annuel' : fee.frequency === 'monthly' ? 'Mensuel' : 'Par transaction'}</p>
-                </div>
-              </div>
-              {fee.suggestion && (
-                <div className="mt-2 flex items-start gap-2 bg-[#f4be7e]/8 border border-[#f4be7e]/15 rounded-[10px] p-3">
-                  <Lightbulb size={16} className="text-[#f4be7e] mt-0.5 shrink-0" />
-                  <div className="text-sm">
-                    <p className="text-[#f4be7e]">{fee.suggestion}</p>
-                    {fee.alternativeFee !== undefined && (
-                      <p className="text-[#a0a0a6] mt-1">
-                        Frais alternatif : <span className="text-[#34d399]">{fee.alternativeFee}%</span> (vs {fee.percentage}% actuel)
-                      </p>
+    <div className="space-y-5">
+      <PageHeader title="Frais" subtitle="Ce que vos comptes vous coûtent, et ce que vous pourriez économiser" action={add} />
+      <Loader query={fees}>
+        {(list) => list.length === 0 ? (
+          <Card><EmptyState icon={<Receipt size={26} />} title="Aucun frais enregistré" text="Saisissez les frais de vos comptes pour mesurer leur poids sur le long terme." action={add} /></Card>
+        ) : (
+          <div className="space-y-4 sm:space-y-6">
+            <Impact fees={list} capital={summary.data?.assets ?? 0} currency={currency} />
+            <Card>
+              <CardHeader><CardTitle>Détail des frais</CardTitle></CardHeader>
+              <ul className="space-y-3">
+                {list.map((fee) => (
+                  <li key={fee.id} className="p-4 bg-white/[0.03] rounded-[12px] border border-white/[0.05]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2"><h3 className="font-medium text-[#f5f5f5] text-sm">{fee.label}</h3><Badge>{FEE_TYPES[fee.type] ?? fee.type}</Badge></div>
+                        <p className="text-xs text-[#8e8e98] mt-0.5 truncate">{fee.accountName}</p>
+                      </div>
+                      <div className="flex items-start gap-1 shrink-0">
+                        <div className="text-right">
+                          <p className="font-bold tabular-nums text-[#f5f5f5] text-sm">{formatCurrencyDetailed(fee.amount, currency)}</p>
+                          <p className="text-xs text-[#8e8e98]">{percent(fee.percentage)} · {FREQUENCY[fee.frequency] ?? fee.frequency}</p>
+                        </div>
+                        {fee.isManual && <button onClick={() => setDeleting(fee)} aria-label={`Supprimer ${fee.label}`} className="w-11 h-11 -mt-2 -mr-2 flex items-center justify-center text-[#a0a0a6] hover:text-[#f87171] rounded-[10px] hover:bg-white/[0.05]"><Trash2 size={15} /></button>}
+                      </div>
+                    </div>
+                    {(fee.suggestion || (fee.alternativeFee !== null && fee.alternativeFee !== undefined)) && (
+                      <div className="mt-3 flex items-start gap-2 bg-[#f4be7e]/[0.08] border border-[#f4be7e]/15 rounded-[10px] p-3 text-sm">
+                        <Lightbulb size={16} className="text-[#f4be7e] mt-0.5 shrink-0" />
+                        <div className="min-w-0">
+                          {fee.suggestion && <p className="text-[#f4be7e]">{fee.suggestion}</p>}
+                          {fee.alternativeFee !== null && fee.alternativeFee !== undefined && <p className="text-[#a0a0a6] mt-0.5">Taux alternatif : <span className="text-[#34d399]">{percent(fee.alternativeFee)}</span> contre {percent(fee.percentage)} aujourd&apos;hui.</p>}
+                        </div>
+                      </div>
                     )}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </Card>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        )}
+      </Loader>
+      <Modal isOpen={adding} onClose={() => setAdding(false)} title="Ajouter des frais">
+        {eligible.length ? <FeeForm accounts={eligible} onDone={() => setAdding(false)} /> : (
+          <div className="text-center py-4">
+            <p className="text-sm text-[#a0a0a6] mb-4">Des frais se rattachent à un compte. Créez d&apos;abord ce compte.</p>
+            <Link href="/dashboard/accounts?add=1"><Button>Créer un compte</Button></Link>
+          </div>
+        )}
+      </Modal>
+      <ConfirmDialog isOpen={!!deleting} onClose={() => setDeleting(null)} title="Supprimer ces frais ?" text={deleting ? `${deleting.label} (${deleting.accountName}).` : ''} confirmLabel="Supprimer" loading={remove.isPending} onConfirm={() => deleting && remove.mutate(deleting.id)} />
     </div>
   );
 }

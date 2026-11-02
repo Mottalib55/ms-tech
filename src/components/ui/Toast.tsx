@@ -46,7 +46,7 @@ export default function ToastContainer() {
   }, [addToast]);
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm">
+    <div aria-live="polite" className="fixed left-4 right-4 sm:left-auto bottom-[calc(5.5rem+env(safe-area-inset-bottom))] lg:bottom-4 sm:right-4 z-[100] flex flex-col gap-2 sm:max-w-sm">
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onRemove={removeToast} />
       ))}
@@ -64,14 +64,15 @@ function ToastItem({ toast: t, onRemove }: { toast: ToastData; onRemove: (id: st
 
   return (
     <div
+      role={t.type === 'error' ? 'alert' : 'status'}
       className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-[12px] border shadow-lg animate-in',
+        'flex items-center gap-3 px-4 py-3 rounded-[12px] border shadow-lg animate-in bg-[#141416]',
         colors[t.type]
       )}
     >
       <Icon size={16} className="shrink-0" />
       <span className="text-sm flex-1">{t.message}</span>
-      <button onClick={() => onRemove(t.id)} className="shrink-0 opacity-60 hover:opacity-100">
+      <button onClick={() => onRemove(t.id)} aria-label="Fermer le message" className="shrink-0 opacity-60 hover:opacity-100 p-1">
         <X size={14} />
       </button>
     </div>
