@@ -64,7 +64,7 @@ export function Loader<T>({ query, children, skeleton }: {
   skeleton?: ReactNode;
 }) {
   if (query.isPending) return <>{skeleton ?? <PageSkeleton />}</>;
-  if (query.isError || query.data === undefined) return <ErrorState error={query.error} onRetry={() => query.refetch()} />;
+  if (query.isError || query.data == null) return <ErrorState error={query.error} onRetry={() => query.refetch()} />;
   return <>{children(query.data)}</>;
 }
 

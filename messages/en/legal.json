@@ -55,7 +55,7 @@
         "h": "Bank aggregation"
       },
       {
-        "p": "Bank aggregation goes through providers licensed for the account information service. Access is read-only: MS Tech cannot move money or place orders."
+        "p": "Bank aggregation goes through providers licensed for the account information service. Access is read-only: Kenz cannot move money or place orders."
       },
       {
         "h": "Retention period"
@@ -84,19 +84,19 @@
         "h": "1. Purpose"
       },
       {
-        "p": "These terms govern the use of MS Tech, published by {name}. Creating an account constitutes acceptance."
+        "p": "These terms govern the use of Kenz, published by {name}. Creating an account constitutes acceptance."
       },
       {
         "h": "2. Service"
       },
       {
-        "p": "MS Tech lets you bring together your accounts, entered by hand or linked to third-party providers, and view net worth, allocation, fees, dividends, budget, projections and simulations."
+        "p": "Kenz lets you bring together your accounts, entered by hand or linked to third-party providers, and view net worth, allocation, fees, dividends, budget, projections and simulations."
       },
       {
         "h": "3. No investment advice"
       },
       {
-        "p": "MS Tech is an information service. No content constitutes investment advice, a personalised recommendation, or tax or legal advice. Projections and simulations rest on assumptions you choose and do not predict any result. Investing carries a risk of capital loss; your decisions are your own."
+        "p": "Kenz is an information service. No content constitutes investment advice, a personalised recommendation, or tax or legal advice. Projections and simulations rest on assumptions you choose and do not predict any result. Investing carries a risk of capital loss; your decisions are your own."
       },
       {
         "h": "4. Accuracy of data"
@@ -179,10 +179,10 @@
         "h": "Nature of the service"
       },
       {
-        "p": "MS Tech is an information service that presents an overview of the user's financial data. It is neither investment advice, nor a personalised recommendation, nor a payment service."
+        "p": "Kenz is an information service that presents an overview of the user's financial data. It is neither investment advice, nor a personalised recommendation, nor a payment service."
       },
       {
-        "p": "Bank aggregation goes through providers licensed for the account information service. MS Tech never has access to your bank credentials, which are entered on the pages of these providers or of your bank."
+        "p": "Bank aggregation goes through providers licensed for the account information service. Kenz never has access to your bank credentials, which are entered on the pages of these providers or of your bank."
       },
       {
         "h": "Intellectual property"

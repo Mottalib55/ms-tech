@@ -73,7 +73,7 @@
     "title": "Your data, your rules",
     "readOnly": {
       "title": "Read-only",
-      "text": "MS Tech reads your balances and positions. It cannot move money or place orders."
+      "text": "Kenz reads your balances and positions. It cannot move money or place orders."
     },
     "export": {
       "title": "Export at any time",

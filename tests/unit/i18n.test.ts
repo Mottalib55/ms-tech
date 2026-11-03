@@ -35,7 +35,7 @@ describe('messages', () => {
   it('Arabic is really Arabic: a text with words holds Arabic letters', () => {
     const missing = namespaces.flatMap((ns) => flat(load('ar', ns))
       .filter(([, v]) => /[a-zA-Z]{4,}/.test(v.replace(/\{[^}]*\}/g, '')) && !/[؀-ۿ]/.test(v))
-      .filter(([, v]) => !/^(MS Tech|Binance|Interactive Brokers|ETF|Powens|Lean|Salt Edge|PEA)\b/.test(v))
+      .filter(([, v]) => !/^(Kenz|Binance|Interactive Brokers|ETF|Powens|Lean|Salt Edge|PEA)\b/.test(v))
       // Not language: an example address, a slot in a legal page, an embedded tag.
       .filter(([k, v]) => !/emailPlaceholder$|\.slot$/.test(k) && !/^<\w+><\/\w+>\.?$/.test(v))
       .map(([k, v]) => `${ns}: ${k} = ${v.slice(0, 40)}`));

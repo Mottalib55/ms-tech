@@ -1,11 +1,11 @@
 {
   "loginCode": {
-    "subject": "Your MS Tech code: {code}",
-    "body": "Here is your MS Tech sign-in code, valid for 10 minutes:",
+    "subject": "Your Kenz code: {code}",
+    "body": "Here is your Kenz sign-in code, valid for 10 minutes:",
     "ignore": "If you did not ask for this, ignore this message."
   },
   "reset": {
-    "subject": "Reset your MS Tech password",
+    "subject": "Reset your Kenz password",
     "hello": "Hello,",
     "body": "To choose a new password, open this link (valid for one hour):",
     "ignore": "If you did not ask for this, ignore this message."

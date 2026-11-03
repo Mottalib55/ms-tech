@@ -29,10 +29,10 @@ export async function generateMetadata({ params }: Pick<Props, 'params'>): Promi
   const t = await getTranslations({ locale, namespace: 'common.meta' });
   return {
     metadataBase: process.env.NEXTAUTH_URL ? new URL(process.env.NEXTAUTH_URL) : undefined,
-    title: { default: t('title'), template: '%s — MS Tech' },
+    title: { default: t('title'), template: '%s — Kenz' },
     description: t('description'),
-    applicationName: 'MS Tech',
-    appleWebApp: { capable: true, title: 'MS Tech', statusBarStyle: 'default' },
+    applicationName: 'Kenz',
+    appleWebApp: { capable: true, title: 'Kenz', statusBarStyle: 'default' },
     icons: { icon: [{ url: '/favicon.ico' }, { url: '/icons/icon-192.png', type: 'image/png', sizes: '192x192' }], apple: '/icons/apple-touch-icon.png' },
     formatDetection: { telephone: false },
     alternates: { languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])) },

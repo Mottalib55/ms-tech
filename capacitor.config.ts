@@ -8,7 +8,7 @@ const url = process.env.CAP_SERVER_URL ?? 'https://ms-tech-orpin.vercel.app';
 
 const config: CapacitorConfig = {
   appId: 'com.mstech.patrimoine',
-  appName: 'MS Tech',
+  appName: 'Kenz',
   webDir: 'ios-shell/www',
   appendUserAgent: 'MSTechApp/1',
   server: {
@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
     // Bank consent pages open inside the app so the callback returns to the session.
     allowNavigation: ['*.biapi.pro', '*.powens.com', '*.leantech.me', '*.saltedge.com', '*.interactivebrokers.com'],
   },
-  ios: { contentInset: 'never', scheme: 'MS Tech', limitsNavigationsToAppBoundDomains: false },
+  ios: { contentInset: 'never', scheme: 'Kenz', limitsNavigationsToAppBoundDomains: false },
   plugins: {
     // No backgroundColor: the native view then follows the device's light or dark mode.
     SplashScreen: { launchAutoHide: true, launchShowDuration: 300, showSpinner: false },

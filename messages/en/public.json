@@ -6,8 +6,8 @@
     "terms": "Terms",
     "privacy": "Privacy",
     "mentions": "Legal notice",
-    "disclaimer": "MS Tech is an information service about your wealth. It is not investment advice. Past performance does not predict future performance.",
-    "copyright": "© {year} MS Tech — by Market Securities."
+    "disclaimer": "Kenz is an information service about your wealth. It is not investment advice. Past performance does not predict future performance.",
+    "copyright": "© {year} Kenz — by Market Securities."
   },
   "notFound": {
     "title": "Page not found",
@@ -28,7 +28,7 @@
   },
   "sandbox": {
     "title": "Demo bank",
-    "text": "This screen simulates your bank's page. MS Tech is asking for read-only access to your accounts, positions and transactions.",
+    "text": "This screen simulates your bank's page. Kenz is asking for read-only access to your accounts, positions and transactions.",
     "allow": "Allow access",
     "deny": "Decline"
   }

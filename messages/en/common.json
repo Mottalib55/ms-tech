@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "MS Tech — Wealth management",
+    "title": "Kenz — Wealth management",
     "description": "All your wealth on one screen: accounts, allocation, fees, dividends, budget and projections."
   },
   "language": "Language",
@@ -34,9 +34,9 @@
     "empty": "Nothing to report. You'll be alerted here to sync errors, budget overruns and upcoming dividends."
   },
   "lock": {
-    "title": "MS Tech is locked",
+    "title": "Kenz is locked",
     "failed": "Identification failed.",
     "unlock": "Unlock",
-    "reason": "Unlock MS Tech"
+    "reason": "Unlock Kenz"
   }
 }

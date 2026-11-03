@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'MS Tech',
-    short_name: 'MS Tech',
+    name: 'Kenz',
+    short_name: 'Kenz',
     description: 'Wealth management: all your accounts on one screen.',
     start_url: '/dashboard',
     scope: '/',

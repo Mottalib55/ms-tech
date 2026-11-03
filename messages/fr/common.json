@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "MS Tech — Gestion de patrimoine",
+    "title": "Kenz — Gestion de patrimoine",
     "description": "Tout votre patrimoine sur un seul écran : comptes, répartition, frais, dividendes, budget et projections."
   },
   "language": "Langue",
@@ -34,9 +34,9 @@
     "empty": "Rien à signaler. Vous serez prévenu ici en cas d'erreur de synchronisation, de budget dépassé ou de dividende à venir."
   },
   "lock": {
-    "title": "MS Tech est verrouillé",
+    "title": "Kenz est verrouillé",
     "failed": "Identification non aboutie.",
     "unlock": "Déverrouiller",
-    "reason": "Déverrouiller MS Tech"
+    "reason": "Déverrouiller Kenz"
   }
 }

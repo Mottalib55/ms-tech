@@ -31,5 +31,7 @@ export async function api<T = unknown>(url: string, init?: { method?: string; bo
     }
     throw new HttpError(res.status, (data as { error?: string } | null)?.error ?? local(1));
   }
+  // A cut-off answer reads as null: an error to retry, never data a page would crash on.
+  if (data === null) throw new HttpError(0, local(0));
   return data as T;
 }

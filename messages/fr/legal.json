@@ -55,7 +55,7 @@
         "h": "Agrégation bancaire"
       },
       {
-        "p": "L'agrégation bancaire passe par des prestataires agréés pour le service d'information sur les comptes. L'accès est en lecture seule : MS Tech ne peut ni déplacer d'argent ni passer d'ordre."
+        "p": "L'agrégation bancaire passe par des prestataires agréés pour le service d'information sur les comptes. L'accès est en lecture seule : Kenz ne peut ni déplacer d'argent ni passer d'ordre."
       },
       {
         "h": "Durée de conservation"
@@ -84,19 +84,19 @@
         "h": "1. Objet"
       },
       {
-        "p": "Les présentes conditions régissent l'utilisation de MS Tech, édité par {name}. Créer un compte vaut acceptation."
+        "p": "Les présentes conditions régissent l'utilisation de Kenz, édité par {name}. Créer un compte vaut acceptation."
       },
       {
         "h": "2. Service"
       },
       {
-        "p": "MS Tech vous permet de rassembler vos comptes, saisis à la main ou reliés à des fournisseurs tiers, et de consulter patrimoine net, répartition, frais, dividendes, budget, projections et simulations."
+        "p": "Kenz vous permet de rassembler vos comptes, saisis à la main ou reliés à des fournisseurs tiers, et de consulter patrimoine net, répartition, frais, dividendes, budget, projections et simulations."
       },
       {
         "h": "3. Pas de conseil en investissement"
       },
       {
-        "p": "MS Tech est un service d'information. Aucun contenu ne constitue un conseil en investissement, une recommandation personnalisée, ni un conseil fiscal ou juridique. Projections et simulations reposent sur des hypothèses que vous choisissez et n'annoncent aucun résultat. Investir comporte un risque de perte en capital ; vos décisions vous appartiennent."
+        "p": "Kenz est un service d'information. Aucun contenu ne constitue un conseil en investissement, une recommandation personnalisée, ni un conseil fiscal ou juridique. Projections et simulations reposent sur des hypothèses que vous choisissez et n'annoncent aucun résultat. Investir comporte un risque de perte en capital ; vos décisions vous appartiennent."
       },
       {
         "h": "4. Exactitude des données"
@@ -179,10 +179,10 @@
         "h": "Nature du service"
       },
       {
-        "p": "MS Tech est un service d'information qui présente une vue d'ensemble des données financières de l'utilisateur. Il ne constitue ni un conseil en investissement, ni une recommandation personnalisée, ni un service de paiement."
+        "p": "Kenz est un service d'information qui présente une vue d'ensemble des données financières de l'utilisateur. Il ne constitue ni un conseil en investissement, ni une recommandation personnalisée, ni un service de paiement."
       },
       {
-        "p": "L'agrégation bancaire passe par des prestataires agréés pour le service d'information sur les comptes. MS Tech n'a jamais accès à vos identifiants bancaires, saisis sur les pages de ces prestataires ou de votre banque."
+        "p": "L'agrégation bancaire passe par des prestataires agréés pour le service d'information sur les comptes. Kenz n'a jamais accès à vos identifiants bancaires, saisis sur les pages de ces prestataires ou de votre banque."
       },
       {
         "h": "Propriété intellectuelle"

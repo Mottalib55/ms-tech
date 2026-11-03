@@ -1,11 +1,11 @@
 {
   "loginCode": {
-    "subject": "Votre code MS Tech : {code}",
-    "body": "Voici votre code de connexion à MS Tech, valable 10 minutes :",
+    "subject": "Votre code Kenz : {code}",
+    "body": "Voici votre code de connexion à Kenz, valable 10 minutes :",
     "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message."
   },
   "reset": {
-    "subject": "Réinitialisez votre mot de passe MS Tech",
+    "subject": "Réinitialisez votre mot de passe Kenz",
     "hello": "Bonjour,",
     "body": "Pour choisir un nouveau mot de passe, ouvrez ce lien (valable une heure) :",
     "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message."
